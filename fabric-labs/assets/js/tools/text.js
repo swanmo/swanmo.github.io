@@ -17,7 +17,7 @@ function attachTextListener() {
 	var onMove = function(options) {
 		if (editor) {
 			editor.set({'top': (options.e.clientY - util.getOffsetTop())});
-			editor.set({'left': options.e.clientX});
+			editor.set({'left': options.e.clientX - util.getOffsetLeft()});
 			editor.setCoords();
 			canvas.renderAll();
 		}

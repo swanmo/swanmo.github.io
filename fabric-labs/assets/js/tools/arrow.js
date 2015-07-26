@@ -70,11 +70,11 @@ function attachCircleMarker(options) {
 	var onMove = function(options) {
 		if (circleMarker) {
 			circleMarker.set({'top': (options.e.clientY - util.getOffsetTop())});
-			circleMarker.set({'left': options.e.clientX});
+			circleMarker.set({'left': options.e.clientX - util.getOffsetLeft()});
 			circleMarker.setCoords();
 		}
 		if (start) {
-			var _x2 = options.e.clientX;
+			var _x2 = options.e.clientX - util.getOffsetLeft();
 			var _y2 = options.e.clientY - util.getOffsetTop();
 			line.set({'x2': _x2});
 			line.set({'y2': _y2});
@@ -97,7 +97,7 @@ function attachCircleMarker(options) {
 			canvas.remove(circleMarker);
 			circleMarker = undefined;
 		} else if (!end) {
-			end = {top: options.e.clientY - util.getOffsetTop(), left: options.e.clientX};
+			end = {top: options.e.clientY - util.getOffsetTop(), left: options.e.clientX - util.getOffsetLeft()};
 			canvas.off('mouse:move', onMove);
 			canvas.off('mouse:up', onMUP);
 			arrow.fill =  arrowColor;

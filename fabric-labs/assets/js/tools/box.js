@@ -15,7 +15,7 @@ function attachBoxListener() {
 	var onMove = function(options) {
 		if (rect) {
 			rect.set({'top': (options.e.clientY - util.getOffsetTop())});
-			rect.set({'left': options.e.clientX});
+			rect.set({'left': options.e.clientX - util.getOffsetLeft()});
 			rect.setCoords();
 			canvas.renderAll();
 		}

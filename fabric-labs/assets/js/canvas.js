@@ -5,6 +5,7 @@
 	var c = new fabric.Canvas('whatta');
 	var canvasElem = d.getElementById('canvasWrapper');
 	var canvasTop = canvasElem.offsetTop;
+	var canvasLeft = canvasElem.offsetLeft;
 
 	var functionRepository = {};
 
@@ -39,9 +40,10 @@
 			console.log('getWidth', this.canvas.width);
 			return CANVAS_WIDTH;
 		},
+		getOffsetLeft: function() {
+			return canvasLeft  - scrollPosition(canvasElem)[0]
+		},
 		getOffsetTop: function() {
-
-			console.log('pos', scrollPosition(canvasElem));
 			return canvasTop - scrollPosition(canvasElem)[1];
 		},
 		registerActionHandler: function(name, clickHandlerFn) {
