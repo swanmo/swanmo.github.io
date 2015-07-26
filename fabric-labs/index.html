@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>sample</title>
+  <link rel="stylesheet" type="text/css" href="assets/css/page.css">
+  <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+</head>
+<body>
+  <h1>Fabrication tools lab</h1>
+  <pre>
+    <div id="dumpArea">
+    </div>
+  </pre>
+  <div id="actionArea">
+    <div id="toolbar">
+      <ul>
+        <li id="action_box"
+          title="Frame">
+            <i class="fa fa-square-o"></i>
+        </li>
+        <li title="Arrow indicator" id="action_arrow"><i class="fa fa-long-arrow-right"></i></li>
+        <li title="Text" id="action_text"><i class="fa fa-font"></i></li>
+        <li id="action_hline"
+          title="Horizontal line"><i class="fa fa-minus-square-o"></i></li>
+        <li id="action_remove" class="inactive"
+          title="Remove object"><i class="fa fa-trash-o"></i></li>
+        <li id="action_clear"
+          title="Clear all painted stuff"><i class="fa fa-bar-chart"></i></li>
+        <li id="action_dump"
+          title="Dump json"><i class="fa fa-floppy-o"></i></li>
+      </ul>
+
+    </div>
+    <div id="canvasWrapper">
+      <canvas id="whatta"></canvas>
+    </div>
+  </div>
+
+  <script src="./vendor/fabric.js-1.5.0/dist/fabric.js"></script>
+  <script src="./assets/js/canvas.js"></script>
+  <script src="./assets/js/tools/hline.js"></script>
+  <script src="./assets/js/tools/box.js"></script>
+  <script src="./assets/js/tools/text.js"></script>
+  <script src="./assets/js/tools/arrow.js"></script>
+  <script src="./assets/js/tools/remove-tool.js"></script>
+  <script src="./assets/js/tools/clear-tool.js"></script>
+  <script src="./assets/js/tools/dump-tool.js"></script>
+  <script src="./assets/js/page.js"></script>
+
+</body>
+</html>
