@@ -1,19 +1,19 @@
-(function(d, canvasUtility) {
-	var c = canvasUtility.canvas;
-	var manageClear = function() {
-		if (confirm('This will restore your image to its default state.\nAll your modifications will be deleted.\nDo you want to continue?')) {
-			clearAll();
+(function(w) {
+	var ResetTool = function(canvas, util) {
+		this.run = function() {
+			if (confirm('This will restore your image to its default state.\nAll your modifications will be deleted.\nDo you want to continue?')) {
+				clearAll();
+			}
+		};
+
+		function clearAll() {
+			var all = canvas.getObjects();
+			for (var i = all.length - 1; i >= 0; i--) {
+				canvas.remove(all[i]);
+			}
 		}
 	};
 
-	function clearAll() {
-		var all = c.getObjects();
-		for (var i = all.length - 1; i >= 0; i--) {
-			console.log('c', i, all.length)
-			c.remove(all[i]);
-		}
-	}
-
-	canvasUtility.registerActionHandler('clearAll', manageClear);
+	w.registerCanvasTool('reset', ResetTool);
 	
-}(document, window._canvasUtil));
+}(window));
