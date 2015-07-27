@@ -37,6 +37,21 @@
 		this.canvasTop = canvasElem.offsetTop;
 		this.canvasLeft = canvasElem.offsetLeft;
 
+		var subscriptions = {};
+		this.subscribe = function(subscriber, onNotifyFn) {
+			subscriptions[subscriber] = onNotifyFn;
+		};
+
+		this.unsubscribe = function(subscriber) {
+			delete subscriptions[subscriber];
+		};
+
+		this.notify = function(eventType, payload) {
+			for (var key in subscriptions) {
+				subscriptions[key].apply(undefined, [eventType, payload]);
+			}
+		};
+
 		this.initFabricjsCanvas = function(canvasElem) {
 			var fabricCanvas = new fabric.Canvas(canvasElem);
 
