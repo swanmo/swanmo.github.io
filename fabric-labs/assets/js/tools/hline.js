@@ -1,50 +1,77 @@
 (function(w) {
 
-    var HorizontalLineTool = function(canvas, util) {
+    var HorizontalLineTool = function(canvas, canvasTool) {
 
-        this.run = function() {
-            var rect = new fabric.Rect({
+        var isOngoing = false;
+        function createLineRect() {
+            return new fabric.Rect({
                 left: 0,
                 top: 1,
-                width: util.getWidth(),
+                width: canvasTool.getWidth(),
                 height: 2,
-                fill: '#f55',
+                fill: '#000',
                 opacity: 0.7,
                 hasControls: false,
                 hasBorders: true
             });
+        }
+        var movingRect;
+        this.run = function() {
+            if (isOngoing) {
+                abort();
+                return;
+            }
+            isOngoing = true;
+            movingRect = createLineRect();
+            canvasTool.subscribe('HLineTool', function(eventType, keyCode) {
+                if (eventType === 'keydown' && keyCode === 27) {
+                    abort();
+                }
+            });
+
+            function abort() {
+                console.log('aborting hline');
+                isOngoing = false;
+                canvas.remove(movingRect);
+                movingRect = undefined;
+                canvasTool.unsubscribe('HLineTool');
+                detachHLineListener();
+            }
+            
 
             var onRectMove = function(ctx) {
-                if (rect) {
-                    rect.set({
+                if (movingRect) {
+                    movingRect.set({
                         'left': 0
                     });
                 }
             };
-            rect.on('moving', onRectMove);
+            movingRect.on('moving', onRectMove);
 
-            canvas.add(rect);
+            canvas.add(movingRect);
 
             var onMove = function(options) {
-                if (rect) {
-                    rect.set({
-                        'top': (options.e.clientY - util.getOffsetTop())
+                if (movingRect) {
+                    movingRect.set({
+                        'top': (options.e.clientY - canvasTool.getOffsetTop())
                     });
-                    rect.setCoords();
+                    movingRect.setCoords();
                     canvas.renderAll();
                 }
             };
             canvas.on('mouse:move', onMove);
 
             function detachHLineListener() {
-                if (rect) {
-                    canvas.off('mouse:move', onMove);
-                    canvas.off('mouse:up', onMUP);
-                }
+            
+                canvas.off('mouse:move', onMove);
+                canvas.off('mouse:up', onMUP);
+                
             }
 
             var onMUP = function(options) {
-                detachHLineListener();
+                movingRect.fill='#666';
+                movingRect = createLineRect();
+                canvas.add(movingRect);
             };
 
             canvas.on('mouse:up', onMUP);

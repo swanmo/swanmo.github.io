@@ -8,9 +8,16 @@
     setupTool('action_text', 'text', canvasTool);
     setupTool('action_hline', 'hline', canvasTool);
     setupTool('action_arrow', 'arrow', canvasTool);
-    setupTool('action_remove', 'remove', canvasTool);
+    var removeAction = setupTool('action_remove', 'remove', canvasTool);
     setupTool('action_dump', 'dump', canvasTool);
 
+
+    d.onkeydown = function(e) {
+        console.log('event', e.keyCode)
+        if (e.keyCode === 46 || e.keyCode === 27) {
+            canvasTool.notify('keydown', e.keyCode);
+        }
+    };
 
     var oRemoveBtn = d.querySelector('#action_remove');
 
@@ -28,12 +35,13 @@
             console.log('Tool ' + canvasToolId + ' is incorrectly registered');
         } else {
             var toolInstance = new ToolResource(canvasTool.canvas, canvasTool);
-            console.log('xx', canvasToolId, toolInstance.run);
+
             if (!toolInstance.run) {
                 console.log('Tool ' + canvasToolId + ' has no run function');
 
             }
             d.getElementById(domId).onclick = toolInstance.run;
+            return toolInstance;
         }
     }
 
