@@ -1,7 +1,10 @@
 (function(w) {
 
     var HorizontalLineTool = function(canvas, canvasTool) {
-
+        this.init = function() {
+            console.log('init HorizontalLineTool');
+            canvasTool.subscribeTo(w._canvasToolConst.TOOL.HLINE, 'HorizontalLineTool', this.run);
+        };
         var isOngoing = false;
         function createLineRect() {
             return new fabric.Rect({
@@ -17,6 +20,7 @@
         }
         var movingRect;
         this.run = function() {
+            console.log('run hline');
             if (isOngoing) {
                 abort();
                 return;

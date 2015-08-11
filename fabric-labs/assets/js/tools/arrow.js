@@ -8,6 +8,11 @@
     var ArrowTool = function(canvas, util) {
         var arrow;
 
+        this.init = function() {
+            console.log('init ArrowTool');
+            util.subscribeTo(w._canvasToolConst.TOOL.ARROW, 'ArrowTool', startArrow);
+        };
+
         // Cred till http://stackoverflow.com/questions/29890294/arrow-shape-using-fabricjs
         function moveArrowIndicator(points) {
             var x1 = points[0],
@@ -40,7 +45,7 @@
             canvas.add(arrow);
         }
 
-        this.run = function() {
+        function startArrow() {
             var start, end;
             var circleMarker = new fabric.Circle({
                 radius: circleMarkerRadius,

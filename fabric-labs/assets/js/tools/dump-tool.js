@@ -1,7 +1,10 @@
 (function(w, d) {
     var DumpTool = function(canvas, util) {
-        this.run = function() {
+		this.init = function() {
+            util.subscribeTo(w._canvasToolConst.TOOL.DUMP, 'DumpTool', dumpJson);
+        };
 
+        function dumpJson() {
             var oContainer = d.querySelector('#dumpArea');
 
             oContainer.innerHTML = JSON.stringify(canvas, null, 2);

@@ -2,7 +2,28 @@
 
 	var CANVAS_WIDTH = 582; 
 	var CANVAS_HEIGHT = 345;
-	var functionRepository = {};
+	var functionRepository = {}, serviceRepository = {};
+	w._canvasToolConst = {
+		TOOL: {
+			ARROW:'arr_t',
+			BOX:'box_t',
+			CLEAR:'cl_t',
+			DUMP:'dump_t',
+			HLINE:'hline_t',
+			REMOVE:'rem_t',
+			TEXT:'txt_t'
+		}
+	};
+
+	w.registerCanvasService = function(name, obj) {
+		console.log('registerCanvasService',name, obj);
+		serviceRepository[name] = obj;
+	};
+
+	w.discoverCanvasService = function(name) {
+		console.log('discoverCanvasService',name, serviceRepository[name]);
+		return serviceRepository[name];
+	};
 
 	w.registerCanvasTool = function(name, initFn) {
 		functionRepository[name] = initFn;
@@ -38,17 +59,30 @@
 		this.canvasLeft = canvasElem.offsetLeft;
 
 		var subscriptions = {};
+		var subscriptionsByTopic = {};
+
 		this.subscribe = function(subscriber, onNotifyFn) {
 			subscriptions[subscriber] = onNotifyFn;
+		};
+		this.subscribeTo = function(topic, subscriberId, onNotifyFn) {
+			console.log('subscribeTo', topic, subscriberId);
+			if (!subscriptionsByTopic[topic]) {
+				subscriptionsByTopic[topic] = [];
+			}
+			subscriptionsByTopic[topic].push({subscriber: subscriberId, callbackFn: onNotifyFn});
 		};
 
 		this.unsubscribe = function(subscriber) {
 			delete subscriptions[subscriber];
 		};
 
-		this.notify = function(eventType, payload) {
-			for (var key in subscriptions) {
-				subscriptions[key].apply(undefined, [eventType, payload]);
+		this.notify = function(topic, payload) {
+			for (var s1 in subscriptions) {
+				subscriptions[s1].apply(undefined, [topic, payload]);
+			}
+			for (var s2 in subscriptionsByTopic[topic]) {
+				console.log('s', s2, subscriptionsByTopic[topic][s2])
+				subscriptionsByTopic[topic][s2].callbackFn.apply(undefined, [topic, payload]);
 			}
 		};
 
