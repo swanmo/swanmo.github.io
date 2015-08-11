@@ -10,7 +10,6 @@
         {id: 'action_remove', content:'<i class="fa fa-trash-o"></i>', address: CONST.TOOL.REMOVE},
         {id: 'action_clear', content:'<i class="fa fa-bar-chart"></i>', address: CONST.TOOL.CLEAR},
         {id: 'action_dump', content:'<i class="fa fa-floppy-o"></i>', address: CONST.TOOL.DUMP}
-
     ];
     
     var HorizontalBar = {
@@ -22,7 +21,10 @@
             }
             var div = d.createElement("div");
             div.id='toolbar';
-            rootNode.appendChild(div);
+
+            rootNode.insertBefore(div, rootNode.childNodes[0]);
+            //rootNode.appendChild(div);
+
             var ul = d.createElement("ul");
             div.appendChild(ul);
             for (var i in tools) {

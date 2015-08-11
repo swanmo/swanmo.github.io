@@ -6,10 +6,10 @@
         var c = canvasTool.canvas;
         var toolbar = w.discoverCanvasService('HorizontalBar');
         if (!toolbar) {
-            alert('Toolbar unavalable');
+            alert('Toolbar unavailable');
             return;
         }
-        toolbar.init(canvasTool,d.getElementById('actionArea'));
+        toolbar.init(canvasTool,d.getElementById('canvasTrash'));
 
         
         var hasToolsDef = !!options && !!options.tools;

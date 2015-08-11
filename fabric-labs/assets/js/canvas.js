@@ -45,17 +45,27 @@
 
 	w.createCanvasTools = function(domId) {
 		var canvasElem = document.createElement("canvas");
+		var innerDiv = document.createElement("div");
+
 		var canvasWrapper = d.getElementById(domId);
-		canvasWrapper.appendChild(canvasElem);
-		return new CanvasTools(canvasElem, canvasWrapper);
+
+		canvasWrapper.appendChild(innerDiv);
+		innerDiv.appendChild(canvasElem);
+		return new CanvasTools(canvasElem, canvasWrapper, innerDiv);
 	};
 
-	function CanvasTools(canvasElem, canvasWrapper) {
-		this.canvasElem = canvasElem;
+	function CanvasTools(_canvasElem, overallWrapper, canvasContainer) {
 		
-		this.canvasWrapper = canvasWrapper;
-		this.canvasTop = canvasElem.offsetTop;
-		this.canvasLeft = canvasElem.offsetLeft;
+		this.canvasElem = _canvasElem;
+		
+		this.overallWrapper = overallWrapper;
+		this.canvasTop = this.canvasElem.offsetTop;
+		this.canvasContainer = canvasContainer;
+		this.getCanvasTop = function() {
+			return this.canvasContainer.offsetTop;
+		};
+
+		this.canvasLeft = _canvasElem.offsetLeft;
 
 		var subscriptions = {};
 		var subscriptionsByTopic = {};
@@ -101,17 +111,18 @@
 			});
 			return fabricCanvas;
 		};
-		this.canvas = this.initFabricjsCanvas(canvasElem);
-		
+		this.canvas = this.initFabricjsCanvas(this.canvasElem);
+
 
 		this.getWidth = function() {
 			return CANVAS_WIDTH;
 		};
 		this.getOffsetLeft = function() {
-			return this.canvasLeft  - scrollPosition(this.canvasElem)[0]
+			return this.canvasLeft  - scrollPosition(this.canvasElem)[0];
 		};
 		this.getOffsetTop = function() {
-			return this.canvasTop - scrollPosition(this.canvasElem)[1];
+
+			return this.getCanvasTop() - scrollPosition(this.canvasElem)[1];
 		};
 	}
 }(document, window));
