@@ -1,4 +1,5 @@
 (function(d, w) {
+	'use strict';
 
 	var CANVAS_WIDTH = 582; 
 	var CANVAS_HEIGHT = 345;
@@ -16,12 +17,10 @@
 	};
 
 	w.registerCanvasService = function(name, obj) {
-		console.log('registerCanvasService',name, obj);
 		serviceRepository[name] = obj;
 	};
 
 	w.discoverCanvasService = function(name) {
-		console.log('discoverCanvasService',name, serviceRepository[name]);
 		return serviceRepository[name];
 	};
 
@@ -65,7 +64,7 @@
 			subscriptions[subscriber] = onNotifyFn;
 		};
 		this.subscribeTo = function(topic, subscriberId, onNotifyFn) {
-			console.log('subscribeTo', topic, subscriberId);
+
 			if (!subscriptionsByTopic[topic]) {
 				subscriptionsByTopic[topic] = [];
 			}
@@ -81,7 +80,6 @@
 				subscriptions[s1].apply(undefined, [topic, payload]);
 			}
 			for (var s2 in subscriptionsByTopic[topic]) {
-				console.log('s', s2, subscriptionsByTopic[topic][s2])
 				subscriptionsByTopic[topic][s2].callbackFn.apply(undefined, [topic, payload]);
 			}
 		};
@@ -107,7 +105,6 @@
 		
 
 		this.getWidth = function() {
-			console.log('getWidth', this.canvasElem.width);
 			return CANVAS_WIDTH;
 		};
 		this.getOffsetLeft = function() {

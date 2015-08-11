@@ -1,4 +1,5 @@
 (function(d, canvasUtility, w) {
+	'use strict';
 
 	w.canvasToolX('canvasTrash');
 

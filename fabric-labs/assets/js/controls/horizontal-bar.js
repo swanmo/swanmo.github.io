@@ -1,20 +1,6 @@
 (function(w, d) {
-    /*
-    <li id="action_box"
-          title="Frame">
-            <i class="fa fa-square-o"></i>
-        </li>
-        <li title="Arrow indicator" id="action_arrow"><i class="fa fa-long-arrow-right"></i></li>
-        <li title="Text" id="action_text"><i class="fa fa-font"></i></li>
-        <li id="action_hline"
-          title="Horizontal line"><i class="fa fa-minus-square-o"></i></li>
-        <li id="action_remove" class="inactive"
-          title="Remove object"><i class="fa fa-trash-o"></i></li>
-        <li id="action_clear"
-          title="Clear all painted stuff"><i class="fa fa-bar-chart"></i></li>
-        <li id="action_dump"
-          title="Dump json"><i class="fa fa-floppy-o"></i></li>
-    */
+    'use strict';
+
     var CONST = w._canvasToolConst;
     var tools = [
         {id: 'action_box', content:'<i class="fa fa-square-o"></i>', address: CONST.TOOL.BOX},

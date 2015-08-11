@@ -1,4 +1,6 @@
 (function(w) {
+	'use strict';
+
     var RemoveTool = function(canvas, canvasTool) {
     	this.init = function() {
             canvasTool.subscribeTo(w._canvasToolConst.TOOL.REMOVE, 'RemoveTool', remove);

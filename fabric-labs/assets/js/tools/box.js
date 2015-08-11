@@ -1,8 +1,8 @@
 (function(w) {
+    'use strict';
 
     var BoxTool = function(canvas, util) {
         this.init = function() {
-            console.log('init HorizontalLineTool');
             util.subscribeTo(w._canvasToolConst.TOOL.BOX, 'BoxTool', attachBoxListener);
         };
 		

@@ -1,4 +1,6 @@
 (function(w, d) {
+    'use strict';
+
     var DumpTool = function(canvas, util) {
 		this.init = function() {
             util.subscribeTo(w._canvasToolConst.TOOL.DUMP, 'DumpTool', dumpJson);

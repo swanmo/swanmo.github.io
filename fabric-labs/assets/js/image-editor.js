@@ -1,21 +1,19 @@
 (function(d, w) {
-
+    'use strict';
 
     w.canvasToolX = function(domId, options) {
         var canvasTool = w.createCanvasTools(domId);
         var c = canvasTool.canvas;
-        console.log('setting up tools...');
         var toolbar = w.discoverCanvasService('HorizontalBar');
         if (!toolbar) {
             alert('Toolbar unavalable');
             return;
         }
-        console.log('setting up tools...2');
         toolbar.init(canvasTool,d.getElementById('actionArea'));
 
         
         var hasToolsDef = !!options && !!options.tools;
-        console.log('setting up tools', hasToolsDef);
+
         if (!hasToolsDef || options.tools.indexOf('rectangle') >= 0)
             setupTool('action_box', 'rectangle', canvasTool);
         if (!hasToolsDef || options.tools.indexOf('reset') >= 0)
@@ -32,7 +30,6 @@
             setupTool('action_dump', 'dump', canvasTool);
 
         d.onkeydown = function(e) {
-            console.log('event', e.keyCode)
             if (e.keyCode === 46 || e.keyCode === 27) {
                 canvasTool.notify('keydown', e.keyCode);
             }

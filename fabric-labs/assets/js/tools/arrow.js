@@ -1,4 +1,5 @@
 (function(w) {
+    'use strict';
 
     var circleMarkerRadius = 8;
     var indicationLength = 20;
@@ -9,7 +10,6 @@
         var arrow;
 
         this.init = function() {
-            console.log('init ArrowTool');
             util.subscribeTo(w._canvasToolConst.TOOL.ARROW, 'ArrowTool', startArrow);
         };
 

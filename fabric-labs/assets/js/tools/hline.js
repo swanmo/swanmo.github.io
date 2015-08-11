@@ -1,8 +1,8 @@
 (function(w) {
+    'use strict';
 
     var HorizontalLineTool = function(canvas, canvasTool) {
         this.init = function() {
-            console.log('init HorizontalLineTool');
             canvasTool.subscribeTo(w._canvasToolConst.TOOL.HLINE, 'HorizontalLineTool', this.run);
         };
         var isOngoing = false;
@@ -20,7 +20,6 @@
         }
         var movingRect;
         this.run = function() {
-            console.log('run hline');
             if (isOngoing) {
                 abort();
                 return;
@@ -34,7 +33,6 @@
             });
 
             function abort() {
-                console.log('aborting hline');
                 isOngoing = false;
                 canvas.remove(movingRect);
                 movingRect = undefined;

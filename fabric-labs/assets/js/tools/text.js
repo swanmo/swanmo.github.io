@@ -1,9 +1,10 @@
 (function(w) {
+    'use strict';
+
     var editorHeight = 30;
 
     var TextTool = function(canvas, util) {
         this.init = function() {
-            console.log('init text', util);
             util.subscribeTo(w._canvasToolConst.TOOL.TEXT, 'TextTool', this.run);
         };
         this.run = function() {
