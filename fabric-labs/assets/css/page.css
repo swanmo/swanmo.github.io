@@ -24,7 +24,9 @@ h1 {
 }
 
 #toolbar ul {
+	padding: 0;
 	margin: auto;
+
 	display: flex;
 	list-style: none;
 }
