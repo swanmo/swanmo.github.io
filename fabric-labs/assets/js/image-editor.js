@@ -31,7 +31,7 @@
 
         d.onkeydown = function(e) {
             if (e.keyCode === 46 || e.keyCode === 27) {
-                canvasTool.notify('keydown', e.keyCode);
+                canvasTool.notify('keydown', 'toolbar', e.keyCode);
             }
         };
 

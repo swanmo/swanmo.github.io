@@ -45,9 +45,29 @@
             canvas.add(arrow);
         }
 
-        function startArrow() {
+
+        function abort() {
+            if (circleMarker) {
+                canvas.add(circleMarker);
+                circleMarker = undefined;
+            }
+            if (line) {
+                canvas.remove(line);
+                canvas.remove(arrow);
+                arrow = line = undefined;    
+            }
+            
+        }
+
+        var circleMarker, line;
+
+        function startArrow(topic, sender, payload) {
+            if (payload === 'toolbar-deactivate'){
+                abort();
+                return;
+            }
             var start, end;
-            var circleMarker = new fabric.Circle({
+            circleMarker = new fabric.Circle({
                 radius: circleMarkerRadius,
                 fill: arrowColor,
                 opacity: 0.7,
@@ -59,8 +79,7 @@
             });
             canvas.add(circleMarker);
 
-
-            var line = new fabric.Line([0, 0, 300, 300], {
+            line = new fabric.Line([0, 0, 300, 300], {
                 strokeWidth: 5,
                 stroke: dragArrowColor,
                 originX: 'center',
@@ -137,7 +156,7 @@
                     canvas.add(group);
                     canvas.remove(line);
                     canvas.remove(arrow);
-                    arrow = undefined;
+                    arrow = line = undefined;
                 }
                 canvas.renderAll();
             };

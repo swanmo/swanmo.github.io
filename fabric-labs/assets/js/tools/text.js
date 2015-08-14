@@ -5,10 +5,30 @@
 
     var TextTool = function(canvas, util) {
         this.init = function() {
-            util.subscribeTo(w._canvasToolConst.TOOL.TEXT, 'TextTool', this.run);
+            util.subscribeTo(w._canvasToolConst.TOOL.TEXT, 'TextTool', textTool);
+            util.subscribeTo('keydown', 'TextTool', function(topic, sender, keyCode) {
+                if (keyCode === 27) {
+                    abort();
+                }
+            });
         };
-        this.run = function() {
-            var editor = new fabric.IText('Click to leave a comment', {
+        function notify(message) {
+            util.notify('TOOL_USAGE', w._canvasToolConst.TOOL.TEXT, message);
+        }
+        var editor;
+        function abort() {
+            if (editor) {
+                canvas.remove(editor);
+                editor = undefined;
+                notify('inactive');
+            }
+        }
+        function textTool(topic, sender, payload) {
+            if (payload!=='toolbar-click') {
+                return;
+            }
+            notify('active');
+            editor = new fabric.IText('Click to leave a comment', {
                 fontFamily: 'arial black',
                 fontSize: 18,
                 left: 100,
@@ -39,6 +59,7 @@
                     editor.setCoords();
                     editor = undefined;
                     canvas.renderAll();
+                    notify('inactive');
                 }
             }
             canvas.on('mouse:up', detachTextListener);

@@ -40,10 +40,17 @@ h1 {
 	border-right:none !important;
 }
 #toolbar ul li {
-// background: linear-gradient(to bottom, #2d3135 0%,#585966 50%,#2d3135 51%,#605F6B 100%); /* W3C */
-
-background: -webkit-linear-gradient(top, #555 0%,#444 50%,#333 51%,#000 100%);
+	background: -webkit-linear-gradient(top, #555 0%,#444 50%,#333 51%,#000 100%);
 	color:rgb(192,192,192);
+	cursor: pointer;
+	border-right:1px solid #888;
+	padding: 10px;
+	width:50px;
+	text-align: center;
+}
+#toolbar ul li.active {
+	background: -webkit-linear-gradient(top, #666 0%,#4f4f4f 50%,#444 51%,#333 100%);
+	color:rgb(240,240,240);
 	cursor: pointer;
 	border-right:1px solid #888;
 	padding: 10px;

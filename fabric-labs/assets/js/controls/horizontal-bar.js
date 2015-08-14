@@ -11,31 +11,56 @@
         {id: 'action_clear', content:'<i class="fa fa-bar-chart"></i>', address: CONST.TOOL.CLEAR},
         {id: 'action_dump', content:'<i class="fa fa-floppy-o"></i>', address: CONST.TOOL.DUMP}
     ];
+
+    function findTool(_address) {
+        for (let i in tools) {
+            if (tools[i].address === _address) {
+                return tools[i];
+            }
+        }
+    }
     
     var HorizontalBar = {
         init: function(canvasTool, rootNode) {
-            function notify(topic) {
+            var activeTool;
+            function notifyActive(topic) {
                 return function() {
-                    canvasTool.notify(topic, 'click');
+                    if (activeTool) {
+                        canvasTool.notify(activeTool, 'toolbar', 'toolbar-deactivate');    
+                    }
+                    if (activeTool !== topic) {
+                        activeTool = topic;
+                        canvasTool.notify(topic, 'toolbar', 'toolbar-click');
+                    } else {
+                        activeTool = undefined;
+                    }
                 };
             }
-            var div = d.createElement("div");
+            var div = d.createElement('div');
             div.id='toolbar';
 
             rootNode.insertBefore(div, rootNode.childNodes[0]);
-            //rootNode.appendChild(div);
 
-            var ul = d.createElement("ul");
+            var ul = d.createElement('ul');
             div.appendChild(ul);
             for (var i in tools) {
                 var t = d.createElement('li');
                 t.id = tools[i].id;
                 t.innerHTML = tools[i].content;
-                t.onclick = notify(tools[i].address);
+                t.onclick = notifyActive(tools[i].address);
 
                 ul.appendChild(t);
             }
+            canvasTool.subscribeTo('TOOL_USAGE', 'toolbar', function(subscriptionId, sender, status) {
+                let currTool = findTool(sender);
 
+                if (status !== 'active') {
+                    d.getElementById(currTool.id).className = '';
+                } else {
+                    console.log('active', currTool.id, subscriptionId, sender);
+                    d.getElementById(currTool.id).className = 'active';
+                }
+            });
         }
     };
 	w.registerCanvasService('HorizontalBar', HorizontalBar);

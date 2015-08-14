@@ -6,6 +6,9 @@
             canvasTool.subscribeTo(w._canvasToolConst.TOOL.HLINE, 'HorizontalLineTool', this.run);
         };
         var isOngoing = false;
+        function notify(message) {
+            canvasTool.notify('TOOL_USAGE', w._canvasToolConst.TOOL.HLINE, message);
+        }
         function createLineRect() {
             return new fabric.Rect({
                 left: 0,
@@ -19,15 +22,17 @@
             });
         }
         var movingRect;
-        this.run = function() {
+        this.run = function(addr, sender, action) {
+
             if (isOngoing) {
                 abort();
                 return;
             }
+            notify('active');
             isOngoing = true;
             movingRect = createLineRect();
-            canvasTool.subscribe('HLineTool', function(eventType, keyCode) {
-                if (eventType === 'keydown' && keyCode === 27) {
+            canvasTool.subscribeTo('keydown', 'HLineTool', function(topic, sender, keyCode) {
+                if (keyCode === 27) {
                     abort();
                 }
             });
@@ -37,7 +42,9 @@
                 canvas.remove(movingRect);
                 movingRect = undefined;
                 canvasTool.unsubscribe('HLineTool');
+
                 detachHLineListener();
+                notify('inactive');
             }
             
 

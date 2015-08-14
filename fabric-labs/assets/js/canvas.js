@@ -81,16 +81,25 @@
 			subscriptionsByTopic[topic].push({subscriber: subscriberId, callbackFn: onNotifyFn});
 		};
 
-		this.unsubscribe = function(subscriber) {
-			delete subscriptions[subscriber];
+		// ToDo needs test
+		this.unsubscribe = function(_subscriber) {
+			delete subscriptions[_subscriber];
+			for (let i in subscriptionsByTopic) {
+				
+				for (let j in subscriptionsByTopic[i]) {
+					if (subscriptionsByTopic[i][j].subscriber === _subscriber) {
+						subscriptionsByTopic[i].splice(j, 1);
+					}
+				}
+			}
 		};
 
-		this.notify = function(topic, payload) {
+		this.notify = function(topic, sender, payload) {
 			for (var s1 in subscriptions) {
-				subscriptions[s1].apply(undefined, [topic, payload]);
+				subscriptions[s1].apply(undefined, [topic, sender, payload]);
 			}
 			for (var s2 in subscriptionsByTopic[topic]) {
-				subscriptionsByTopic[topic][s2].callbackFn.apply(undefined, [topic, payload]);
+				subscriptionsByTopic[topic][s2].callbackFn.apply(undefined, [topic, sender, payload]);
 			}
 		};
 

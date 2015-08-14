@@ -5,10 +5,21 @@
         this.init = function() {
             util.subscribeTo(w._canvasToolConst.TOOL.BOX, 'BoxTool', attachBoxListener);
         };
-		
-        function attachBoxListener() {
+		var rect;
+        function abort() {
+            console.log('ABORT');
+            if (rect) {
+                canvas.remove(rect);
+                rect = undefined;
+            }
+        }
 
-            var rect = new fabric.Rect({
+        function attachBoxListener(topic, sende, payload) {
+            if (payload === 'toolbar-deactivate'){
+                abort();
+                return;
+            }
+            rect = new fabric.Rect({
                 left: 40,
                 top: 40,
                 width: 100,
@@ -42,6 +53,7 @@
                 if (rect) {
                     canvas.off('mouse:move', onMove);
                     canvas.off('mouse:up', onMUP);
+                    rect = undefined;
                 }
             }
 
