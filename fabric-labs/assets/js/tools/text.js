@@ -25,6 +25,7 @@
         }
         function textTool(topic, sender, payload) {
             if (payload!=='toolbar-click') {
+                abort();
                 return;
             }
             notify('active');
