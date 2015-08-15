@@ -12,6 +12,9 @@
         this.init = function() {
             util.subscribeTo(w._canvasToolConst.TOOL.ARROW, 'ArrowTool', startArrow);
         };
+        function notify(message) {
+            util.notify('TOOL_USAGE', w._canvasToolConst.TOOL.ARROW, message);
+        }
 
         // Cred till http://stackoverflow.com/questions/29890294/arrow-shape-using-fabricjs
         function moveArrowIndicator(points) {
@@ -47,26 +50,105 @@
 
 
         function abort() {
+
             if (circleMarker) {
-                canvas.add(circleMarker);
+                canvas.remove(circleMarker);
                 circleMarker = undefined;
+            }
+            if (arrow) {
+                canvas.remove(arrow);
+                arrow = undefined;    
             }
             if (line) {
                 canvas.remove(line);
-                canvas.remove(arrow);
                 arrow = line = undefined;    
             }
-            
+            detachArrowListeners();
+            notify('inactive');
+        }
+        function detachArrowListeners() {
+            canvas.off('mouse:move', onMove);
+            canvas.off('mouse:up', onMUP);
         }
 
-        var circleMarker, line;
+        var onMove = function(options) {
+            if (circleMarker) {
+                circleMarker.set({
+                    'top': (options.e.clientY - util.getOffsetTop())
+                });
+                circleMarker.set({
+                    'left': options.e.clientX - util.getOffsetLeft()
+                });
+                circleMarker.setCoords();
+            }
+            if (start) {
+                var _x2 = options.e.clientX - util.getOffsetLeft();
+                var _y2 = options.e.clientY - util.getOffsetTop();
+                line.set({
+                    'x2': _x2
+                });
+                line.set({
+                    'y2': _y2
+                });
+
+                moveArrowIndicator([start.left, start.top, _x2, _y2]);
+            }
+
+            canvas.renderAll();
+        };
+        var onMUP = function(options) {
+            if (!start) {
+                start = {
+                    top: circleMarker.get('top'),
+                    left: circleMarker.get('left')
+                };
+                line.set({
+                    'x1': start.left
+                });
+                line.set({
+                    'y1': start.top
+                });
+                line.set({
+                    'x2': start.left
+                });
+                line.set({
+                    'y2': start.top
+                });
+                canvas.add(line);
+                canvas.remove(circleMarker);
+                circleMarker = undefined;
+            } else if (!end) {
+                end = {
+                    top: options.e.clientY - util.getOffsetTop(),
+                    left: options.e.clientX - util.getOffsetLeft()
+                };
+                detachArrowListeners();
+                arrow.fill = arrowColor;
+                var group = new fabric.Group([line, arrow], {
+                    hasControls: false,
+                    hasBorders: true,
+                    selectable: true
+                });
+                line.stroke = arrowColor;
+
+                canvas.add(group);
+                canvas.remove(line);
+                canvas.remove(arrow);
+                arrow = line = undefined;
+                notify('inactive');
+            }
+            canvas.renderAll();
+        };
+
+        var circleMarker, line, start, end;;
 
         function startArrow(topic, sender, payload) {
             if (payload === 'toolbar-deactivate'){
                 abort();
                 return;
             }
-            var start, end;
+            start = end = undefined;
+            notify('active');
             circleMarker = new fabric.Circle({
                 radius: circleMarkerRadius,
                 fill: arrowColor,
@@ -88,81 +170,10 @@
                 hasBorders: true,
                 selectable: true
             });
-
-
-            var onMove = function(options) {
-                if (circleMarker) {
-                    circleMarker.set({
-                        'top': (options.e.clientY - util.getOffsetTop())
-                    });
-                    circleMarker.set({
-                        'left': options.e.clientX - util.getOffsetLeft()
-                    });
-                    circleMarker.setCoords();
-                }
-                if (start) {
-                    var _x2 = options.e.clientX - util.getOffsetLeft();
-                    var _y2 = options.e.clientY - util.getOffsetTop();
-                    line.set({
-                        'x2': _x2
-                    });
-                    line.set({
-                        'y2': _y2
-                    });
-
-                    moveArrowIndicator([start.left, start.top, _x2, _y2]);
-                }
-
-                canvas.renderAll();
-            };
+            
             canvas.on('mouse:move', onMove);
-
-            var onMUP = function(options) {
-                if (!start) {
-                    start = {
-                        top: circleMarker.get('top'),
-                        left: circleMarker.get('left')
-                    };
-                    line.set({
-                        'x1': start.left
-                    });
-                    line.set({
-                        'y1': start.top
-                    });
-                    line.set({
-                        'x2': start.left
-                    });
-                    line.set({
-                        'y2': start.top
-                    });
-                    canvas.add(line);
-                    canvas.remove(circleMarker);
-                    circleMarker = undefined;
-                } else if (!end) {
-                    end = {
-                        top: options.e.clientY - util.getOffsetTop(),
-                        left: options.e.clientX - util.getOffsetLeft()
-                    };
-                    canvas.off('mouse:move', onMove);
-                    canvas.off('mouse:up', onMUP);
-                    arrow.fill = arrowColor;
-                    var group = new fabric.Group([line, arrow], {
-                        hasControls: false,
-                        hasBorders: true,
-                        selectable: true
-                    });
-                    line.stroke = arrowColor;
-
-                    canvas.add(group);
-                    canvas.remove(line);
-                    canvas.remove(arrow);
-                    arrow = line = undefined;
-                }
-                canvas.renderAll();
-            };
-
             canvas.on('mouse:up', onMUP);
-        };
+        }
         return this;
     };
 	w.registerCanvasTool('arrow', ArrowTool);

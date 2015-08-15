@@ -2,23 +2,57 @@
     'use strict';
 
     var BoxTool = function(canvas, util) {
+        var rect;
+
         this.init = function() {
             util.subscribeTo(w._canvasToolConst.TOOL.BOX, 'BoxTool', attachBoxListener);
         };
-		var rect;
+		
         function abort() {
-            console.log('ABORT');
             if (rect) {
+                notify('inactive');
                 canvas.remove(rect);
+                detachBoxListener();
+            }
+        }
+
+        function notify(message) {
+            util.notify('TOOL_USAGE', w._canvasToolConst.TOOL.BOX, message);
+        }
+
+        function detachBoxListener() {
+            if (rect) {
+                canvas.off('mouse:move', moveBox);
+                canvas.off('mouse:up', mouseClick);
                 rect = undefined;
             }
         }
 
+        function moveBox(options) {
+            if (rect) {
+                rect.set({
+                    'top': (options.e.clientY - util.getOffsetTop())
+                });
+                rect.set({
+                    'left': options.e.clientX - util.getOffsetLeft()
+                });
+                rect.setCoords();
+                canvas.renderAll();
+            }
+        };
+
+        function mouseClick(options) {
+            notify('inactive');
+            detachBoxListener();
+        };
+
         function attachBoxListener(topic, sende, payload) {
+            console.log('BOX * * * * * *', payload);
             if (payload === 'toolbar-deactivate'){
                 abort();
                 return;
             }
+            notify('active');
             rect = new fabric.Rect({
                 left: 40,
                 top: 40,
@@ -35,33 +69,9 @@
 
             canvas.add(rect);
 
-            var onMove = function(options) {
-                if (rect) {
-                    rect.set({
-                        'top': (options.e.clientY - util.getOffsetTop())
-                    });
-                    rect.set({
-                        'left': options.e.clientX - util.getOffsetLeft()
-                    });
-                    rect.setCoords();
-                    canvas.renderAll();
-                }
-            };
-            canvas.on('mouse:move', onMove);
-
-            function detachHLineListener() {
-                if (rect) {
-                    canvas.off('mouse:move', onMove);
-                    canvas.off('mouse:up', onMUP);
-                    rect = undefined;
-                }
-            }
-
-            var onMUP = function(options) {
-                detachHLineListener();
-            };
-
-            canvas.on('mouse:up', onMUP);
+            
+            canvas.on('mouse:move', moveBox);
+            canvas.on('mouse:up', mouseClick);
         }
         return this;
     };
