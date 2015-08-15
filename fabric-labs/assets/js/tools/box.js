@@ -25,6 +25,7 @@
                 canvas.off('mouse:move', moveBox);
                 canvas.off('mouse:up', mouseClick);
                 rect = undefined;
+                util.unsubscribeTo('keydown', 'BoxTool');
             }
         }
 
@@ -47,11 +48,15 @@
         };
 
         function attachBoxListener(topic, sende, payload) {
-            console.log('BOX * * * * * *', payload);
             if (payload === 'toolbar-deactivate'){
                 abort();
                 return;
             }
+            util.subscribeTo('keydown', 'BoxTool', function(topic, sender, keyCode) {
+                if (keyCode === 27) {
+                    abort();
+                }
+            });
             notify('active');
             rect = new fabric.Rect({
                 left: 40,

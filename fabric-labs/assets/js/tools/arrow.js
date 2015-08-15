@@ -64,6 +64,7 @@
                 arrow = line = undefined;    
             }
             detachArrowListeners();
+            util.unsubscribeTo('keydown', 'TextTool');
             notify('inactive');
         }
         function detachArrowListeners() {
@@ -147,6 +148,11 @@
                 abort();
                 return;
             }
+            util.subscribeTo('keydown', 'ArrowTool', function(topic, sender, keyCode) {
+                if (keyCode === 27) {
+                    abort();
+                }
+            });
             start = end = undefined;
             notify('active');
             circleMarker = new fabric.Circle({
