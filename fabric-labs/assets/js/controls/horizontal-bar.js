@@ -55,6 +55,9 @@
                 let currTool = findTool(sender);
 
                 if (status !== 'active') {
+                    if(sender === activeTool) {
+                        activeTool = undefined;
+                    }
                     d.getElementById(currTool.id).className = '';
                 } else {
                     console.log('active', currTool.id, subscriptionId, sender);
