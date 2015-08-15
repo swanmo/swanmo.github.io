@@ -94,6 +94,15 @@
 			}
 		};
 
+		// ToDo needs test
+		this.unsubscribeTo = function(topic, _subscriber) {
+			for (let j in subscriptionsByTopic[topic]) {
+				if (subscriptionsByTopic[topic][j].subscriber === _subscriber) {
+					subscriptionsByTopic[topic].splice(j, 1);
+				}
+			}
+		};
+
 		this.notify = function(topic, sender, payload) {
 			for (var s1 in subscriptions) {
 				subscriptions[s1].apply(undefined, [topic, sender, payload]);
