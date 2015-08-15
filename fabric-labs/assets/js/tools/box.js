@@ -7,12 +7,16 @@
         this.init = function() {
             util.subscribeTo(w._canvasToolConst.TOOL.BOX, 'BoxTool', attachBoxListener);
         };
-		
-        function abort() {
+
+
+        function done() {
             if (rect) {
                 notify('inactive');
-                canvas.remove(rect);
                 detachBoxListener();
+                canvas.selection = true; // Restore fabricjs selection-box
+                canvas.forEachObject(function(o) {
+                  o.selectable = true;
+                });
             }
         }
 
@@ -22,61 +26,95 @@
 
         function detachBoxListener() {
             if (rect) {
-                canvas.off('mouse:move', moveBox);
-                canvas.off('mouse:up', mouseClick);
+                canvas.off('mouse:down', mouseDown);
+                canvas.off('mouse:move', drawBox);
+                canvas.off('mouse:up', drawBoxDone);
+                
                 rect = undefined;
                 util.unsubscribeTo('keydown', 'BoxTool');
             }
         }
+        var currWidth, currHeight;
 
-        function moveBox(options) {
-            if (rect) {
+        function drawBox(options) {
+            if (rect) {                
+                currWidth = (options.e.clientX - util.getOffsetLeft()) - startLeft;
+                currHeight = (options.e.clientY - util.getOffsetTop()) - startTop;
+
                 rect.set({
-                    'top': (options.e.clientY - util.getOffsetTop())
+                    'width': currWidth
                 });
                 rect.set({
-                    'left': options.e.clientX - util.getOffsetLeft()
+                    'height': currHeight
                 });
                 rect.setCoords();
                 canvas.renderAll();
             }
-        };
+        }
+        function drawBoxDone(options) {
+            canvas.off('mouse:move', drawBox);
+            canvas.off('mouse:up', drawBoxDone);
+
+            if (Math.abs(currWidth) < 5 && Math.abs(currHeight) < 5) {
+                canvas.remove(rect);
+                return;
+            }
+            rect.set({opacity: 0.2})
+            canvas.renderAll();
+        }
+
+        var currWidth, currHeight, startTop, startLeft;
+
+        function mouseDown(options) {
+            
+            currWidth = currHeight = 0;
+            startTop = (options.e.clientY - util.getOffsetTop());
+            startLeft = (options.e.clientX - util.getOffsetLeft());
+
+            rect = new fabric.Rect({
+                left: startLeft,
+                top: startTop,
+                width: 4,
+                borderColor: '#444',
+                height: 4,
+                fill: '#888',
+                opacity: 0.3,
+                hasControls: true,
+                hasRotatingPoint:false,
+                originX:'left',
+                originY:'top',
+                selectable: false
+            });
+
+            canvas.add(rect);
+            rect.setCoords();
+            canvas.renderAll();
+            canvas.on('mouse:move', drawBox);
+            canvas.on('mouse:up', drawBoxDone);
+        }
 
         function mouseClick(options) {
             notify('inactive');
             detachBoxListener();
-        };
+        }
 
-        function attachBoxListener(topic, sende, payload) {
+        function attachBoxListener(topic, sender, payload) {
             if (payload === 'toolbar-deactivate'){
-                abort();
+                done();
                 return;
             }
             util.subscribeTo('keydown', 'BoxTool', function(topic, sender, keyCode) {
                 if (keyCode === 27) {
-                    abort();
+                    done();
                 }
             });
-            notify('active');
-            rect = new fabric.Rect({
-                left: 40,
-                top: 40,
-                width: 100,
-                borderColor: '#444',
-                height: 100,
-                fill: '#888',
-                opacity: 0.2,
-                hasControls: true,
-                hasRotatingPoint:false,
-                originX:'center',
-                originY:'center'
+            canvas.selection = false; // Disable fabricjs selection-box
+            canvas.forEachObject(function(o) {
+              o.selectable = false;
             });
-
-            canvas.add(rect);
-
+            notify('active');
             
-            canvas.on('mouse:move', moveBox);
-            canvas.on('mouse:up', mouseClick);
+            canvas.on('mouse:down', mouseDown);
         }
         return this;
     };
