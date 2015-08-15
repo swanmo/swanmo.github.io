@@ -84,9 +84,9 @@
 		// ToDo needs test
 		this.unsubscribe = function(_subscriber) {
 			delete subscriptions[_subscriber];
-			for (let i in subscriptionsByTopic) {
+			for (var i in subscriptionsByTopic) {
 				
-				for (let j in subscriptionsByTopic[i]) {
+				for (var j in subscriptionsByTopic[i]) {
 					if (subscriptionsByTopic[i][j].subscriber === _subscriber) {
 						subscriptionsByTopic[i].splice(j, 1);
 					}
@@ -96,7 +96,7 @@
 
 		// ToDo needs test
 		this.unsubscribeTo = function(topic, _subscriber) {
-			for (let j in subscriptionsByTopic[topic]) {
+			for (var j in subscriptionsByTopic[topic]) {
 				if (subscriptionsByTopic[topic][j].subscriber === _subscriber) {
 					subscriptionsByTopic[topic].splice(j, 1);
 				}

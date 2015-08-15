@@ -13,7 +13,7 @@
     ];
 
     function findTool(_address) {
-        for (let i in tools) {
+        for (var i in tools) {
             if (tools[i].address === _address) {
                 return tools[i];
             }
@@ -52,7 +52,7 @@
                 ul.appendChild(t);
             }
             canvasTool.subscribeTo('TOOL_USAGE', 'toolbar', function(subscriptionId, sender, status) {
-                let currTool = findTool(sender);
+                var currTool = findTool(sender);
 
                 if (status !== 'active') {
                     if(sender === activeTool) {

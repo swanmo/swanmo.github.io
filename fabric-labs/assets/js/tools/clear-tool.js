@@ -12,8 +12,8 @@
 		}	
 
 		function clearAll() {
-			let all = canvas.getObjects();
-			for (let i = all.length - 1; i >= 0; i--) {
+			var all = canvas.getObjects();
+			for (var i = all.length - 1; i >= 0; i--) {
 				canvas.remove(all[i]);
 			}
 		}
