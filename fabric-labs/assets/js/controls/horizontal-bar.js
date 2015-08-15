@@ -60,7 +60,6 @@
                     }
                     d.getElementById(currTool.id).className = '';
                 } else {
-                    console.log('active', currTool.id, subscriptionId, sender);
                     d.getElementById(currTool.id).className = 'active';
                 }
             });
