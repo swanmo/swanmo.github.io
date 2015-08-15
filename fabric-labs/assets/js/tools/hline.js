@@ -5,7 +5,7 @@
         this.init = function() {
             canvasTool.subscribeTo(w._canvasToolConst.TOOL.HLINE, 'HorizontalLineTool', this.run);
         };
-        var isOngoing = false;
+
         function notify(message) {
             canvasTool.notify('TOOL_USAGE', w._canvasToolConst.TOOL.HLINE, message);
         }
@@ -24,12 +24,11 @@
         var movingRect;
         this.run = function(addr, sender, action) {
 
-            if (isOngoing) {
+            if (action!=='toolbar-click') {
                 abort();
                 return;
             }
             notify('active');
-            isOngoing = true;
             movingRect = createLineRect();
             canvasTool.subscribeTo('keydown', 'HLineTool', function(topic, sender, keyCode) {
                 if (keyCode === 27) {
@@ -38,7 +37,6 @@
             });
 
             function abort() {
-                isOngoing = false;
                 canvas.remove(movingRect);
                 movingRect = undefined;
                 canvasTool.unsubscribe('HLineTool');
