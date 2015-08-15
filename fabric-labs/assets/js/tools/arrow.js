@@ -64,7 +64,7 @@
                 arrow = line = undefined;    
             }
             detachArrowListeners();
-            util.unsubscribeTo('keydown', 'TextTool');
+            util.unsubscribeTo('keydown', 'ArrowTool');
             notify('inactive');
         }
         function detachArrowListeners() {
