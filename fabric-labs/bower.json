@@ -1,0 +1,7 @@
+{
+  "name": "demo",
+  "description": "A demo",
+  "dependencies": {
+    "rechart": "https://github.com/recharthq/rechart.js.git#v0.0.1"
+  }
+}
