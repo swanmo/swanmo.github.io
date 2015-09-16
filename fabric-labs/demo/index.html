@@ -9,10 +9,12 @@
 <body>
   <h1>Demo</h1>
 
-  <div id="actionArea">
-    <div id="canvasArea"></div>
-  </div>
 
+  <img src="natural.jpg" id="srcImage" />
+
+  
+  <div id="canvasArea"></div>
+  
   <pre>
     <div id="dumpArea">
     </div>
@@ -22,7 +24,8 @@
   <script src="../bower_components/rechart/dist/rechart.js"></script>
 
   <script type="text/javascript">
-    var rechart1 = new RechartJs('canvasArea', 'natural.jpg');
+    var rechart1 = new RechartJs('canvasArea',
+      document.getElementById('srcImage'), {tools: ['rectangle', 'arrow', 'hline', 'remove']});
   </script>
 
 </body>

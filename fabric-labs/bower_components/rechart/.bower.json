@@ -10,6 +10,10 @@
     "font-awesome": "^v4.4.0"
   },
   "license": "MIT",
+  "moduleType": [
+    "globals",
+    "es6"
+  ],
   "ignore": [
     "**/.*",
     "package.json",
@@ -20,14 +24,14 @@
     "tmp/*"
   ],
   "homepage": "https://github.com/recharthq/rechart.js",
-  "version": "0.0.1",
-  "_release": "0.0.1",
+  "version": "0.0.2",
+  "_release": "0.0.2",
   "_resolution": {
     "type": "version",
-    "tag": "v0.0.1",
-    "commit": "3d781d96da953809d597115e736ec97f597aa917"
+    "tag": "v0.0.2",
+    "commit": "f317a4749c802fbea18ce873903ea32d72054115"
   },
   "_source": "https://github.com/recharthq/rechart.js.git",
-  "_target": "v0.0.1",
+  "_target": "v0.0.2",
   "_originalSource": "https://github.com/recharthq/rechart.js.git"
 }
