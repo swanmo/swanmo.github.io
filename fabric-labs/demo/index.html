@@ -1,32 +1,107 @@
 <!doctype html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8">
-  <title>demo</title>
-  <link rel="stylesheet" type="text/css" href="../bower_components/rechart/dist/rechart.css">
-  <link rel="stylesheet" href="../bower_components/font-awesome/css/font-awesome.css">
+    <meta charset="UTF-8">
+    <title>sample</title>
+
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.1.4/semantic.min.css">
 </head>
+
 <body>
-  <h1>Demo</h1>
+  <div class="main ui container">
+      <h1>Elaboration</h1>
+      <div>
+        <img src="natural.jpg" id="srcImage" />
+      </div>
+    <fieldset>
+      <legend>As binary</legend>    
+      <button class="ui button" onclick="downloadImage()">download image</button>
+      <pre>redrawArea.toDataBlob()</pre>
+    </fieldset>
+
+    <fieldset>
+      <legend>Show Json</legend>
+      <pre>redrawArea.toJson();</pre>
+      <button class="ui button" onclick="showJson()">show json</button>
+      <textarea cols="80" rows="4" id="dumpJson" style="display:none"></textarea>
+    </fieldset>
+    
+    <fieldset>
+      <legend>Load From Json</legend>
+      <pre>redrawArea.fromJson(document.getElementById('loadJson').value);</pre>
+
+      <button class="ui button" onclick="showJsonInput(this)">upload</button>
+      <textarea cols="80" rows="4" id="loadJson" style="display:none"></textarea>
+      <button id="loadBtn" onclick="loadFromJson()" style="display:none">load from json</button>
+    </fieldset>
+
+    <fieldset>
+      <legend>Show image</legend>
+      <pre>redrawArea.toBase64URL();</pre>
+      <button class="ui button" onclick="dumpImage1()">dump base6 4 string</button>
+      <img id="imageDump" />
+    </fieldset>
+
+    <h2 class="ui sub header">Sample</h2>
+      <pre>
+        var redrawArea = new redraw.Annotation(document.getElementById('srcImage'), {
+          buttonCss: 'ui orange basic button',
+          maxWidth:200
+      });
+      </pre>
+
+</div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.1.4/semantic.min.js"></script>
+    <script src="../../vendor/redraw.js"></script>
+    <script type="text/javascript">
+
+    var redrawArea = new redraw.Annotation(document.getElementById('srcImage'), {
+        buttonCss: 'ui orange basic button',
+        maxWidth:200
+    });
 
 
-  <img src="natural.jpg" id="srcImage" />
+    function dumpImage1() {
+      console.log('image',redrawArea.toBase64URL());
+        document.getElementById('imageDump').src = redrawArea.toBase64URL();
+    }
 
-  
-  <div id="canvasArea"></div>
-  
-  <pre>
-    <div id="dumpArea">
-    </div>
-  </pre>
+    function downloadImage() {
+        asByteDownload(redrawArea.toDataBlob(), 'sample-chart.png');
+        console.log('2', redrawArea.toDataBlob());
+    }
 
-  <script src="../bower_components/fabric/dist/fabric.js"></script>
-  <script src="../bower_components/rechart/dist/rechart.js"></script>
+    function showJson() {
+      document.getElementById('dumpJson').value = redrawArea.toJson();
+      document.getElementById('dumpJson').style.display='block';
+    }
 
-  <script type="text/javascript">
-    var rechart1 = new RechartJs('canvasArea',
-      document.getElementById('srcImage'), {tools: ['rectangle', 'arrow', 'hline', 'remove']});
-  </script>
+    function showJsonInput(btn) {
+      btn.style.display='none';
+      document.getElementById('loadJson').style.display='block';
+      document.getElementById('loadBtn').style.display='block';
+    }
 
+    function loadFromJson() {
+      redrawArea.fromJson(document.getElementById('loadJson').value);
+    }
+
+    var asByteDownload = (function() {
+        var link = document.createElement("a");
+        document.body.appendChild(link);
+        link.style.display = 'none';
+
+        return function(data, name) {
+            url = window.URL.createObjectURL(data);
+            link.href = url;
+            link.download = name;
+            link.click();
+            window.URL.revokeObjectURL(url);
+        };
+    }());
+    </script>
 </body>
+
 </html>
