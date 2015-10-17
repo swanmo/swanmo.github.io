@@ -4,67 +4,89 @@
 <head>
     <meta charset="UTF-8">
     <title>sample</title>
-
     <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.1.4/semantic.min.css">
+    <link rel="stylesheet" type="text/css" href="green-disease.css">
+    <link rel="stylesheet" type="text/css" href="black-flexbox.css">
 </head>
 
 <body>
-  <div class="main ui container">
-      <h1>Elaboration</h1>
-      <div>
-        <img src="natural.jpg" id="srcImage" />
+    <div class="main ui container">
+      <h1>Semantic buttons</h1>
+      <img src="chart.png" id="anotherImage" />
+
+      <h1>Tools on top</h1>
+      <div class="black-mass">
+        <img src="chart.png" id="yetAnotherImage" />
       </div>
-    <fieldset>
-      <legend>As binary</legend>    
-      <button class="ui button" onclick="downloadImage()">download image</button>
-      <pre>redrawArea.toDataBlob()</pre>
-    </fieldset>
+        <h1>Green toolbar</h1>
+        <div class="ui basic segment">
+            <div class="ui input green-disease">
+                <img src="chart.png" id="srcImage" />
+            </div>
+            <div class="ui horizontal divider">
+                Export (from the green one)
+            </div>
+            <div>
+                <h4 class="ui horizontal divider header">
+                  <i class="cloud download icon"></i>
+                  Binary download
+                </h4>
+                <button class="ui button" onclick="downloadImage()">download image</button>
+                <pre>redrawArea.toDataBlob()</pre>
+                <h4 class="ui horizontal divider header">
+                  <i class="file code outline icon"></i>
+                  Show Json
+                </h4>
+                <pre>redrawArea.toJson();</pre>
+                <button class="ui button" onclick="showJson()">show json</button>
+                <textarea cols="80" rows="4" id="dumpJson" style="display:none"></textarea>
+                <h4 class="ui horizontal divider header">
+                  <i class="file code outline icon"></i>
+                  Load from Json
+                </h4>
+                <pre>redrawArea.fromJson(document.getElementById('loadJson').value);</pre>
+                <button class="ui button" onclick="showJsonInput(this)">upload</button>
+                <textarea cols="80" rows="4" id="loadJson" style="display:none"></textarea>
+                <button id="loadBtn" onclick="loadFromJson()" style="display:none">load from json</button>
+                <h4 class="ui horizontal divider header">
+                  <i class="file image outline icon"></i>
+                  Show image
+                </h4>
+                <pre>redrawArea.toBase64URL();</pre>
+                <button class="ui button" onclick="dumpImage1()">dump base6 4 string</button>
+                <img id="imageDump" />
+            </div>
+        </div>
 
-    <fieldset>
-      <legend>Show Json</legend>
-      <pre>redrawArea.toJson();</pre>
-      <button class="ui button" onclick="showJson()">show json</button>
-      <textarea cols="80" rows="4" id="dumpJson" style="display:none"></textarea>
-    </fieldset>
-    
-    <fieldset>
-      <legend>Load From Json</legend>
-      <pre>redrawArea.fromJson(document.getElementById('loadJson').value);</pre>
-
-      <button class="ui button" onclick="showJsonInput(this)">upload</button>
-      <textarea cols="80" rows="4" id="loadJson" style="display:none"></textarea>
-      <button id="loadBtn" onclick="loadFromJson()" style="display:none">load from json</button>
-    </fieldset>
-
-    <fieldset>
-      <legend>Show image</legend>
-      <pre>redrawArea.toBase64URL();</pre>
-      <button class="ui button" onclick="dumpImage1()">dump base6 4 string</button>
-      <img id="imageDump" />
-    </fieldset>
-
-    <h2 class="ui sub header">Sample</h2>
-      <pre>
+        <h2 class="ui sub header">Sample</h2>
+        <pre>
         var redrawArea = new redraw.Annotation(document.getElementById('srcImage'), {
           buttonCss: 'ui orange basic button',
           maxWidth:200
       });
       </pre>
 
-</div>
+    
+
+    </div>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.1.4/semantic.min.js"></script>
-    <script src="../../vendor/redraw.js"></script>
+    <script src="../dist/redraw.js"></script>
     <script type="text/javascript">
-
     var redrawArea = new redraw.Annotation(document.getElementById('srcImage'), {
-        buttonCss: 'ui orange basic button',
-        maxWidth:200
+        maxWidth: 700,
+        color:'#5e5'
     });
+
+    var redrawArea = new redraw.Annotation(document.getElementById('anotherImage'), {
+      buttonActiveCss: 'active', buttonCss: 'ui button', toolbarCss: 'ui buttons'
+    });
+
+    var redrawArea = new redraw.Annotation(document.getElementById('yetAnotherImage'));
 
 
     function dumpImage1() {
-      console.log('image',redrawArea.toBase64URL());
+        console.log('image', redrawArea.toBase64URL());
         document.getElementById('imageDump').src = redrawArea.toBase64URL();
     }
 
@@ -74,18 +96,18 @@
     }
 
     function showJson() {
-      document.getElementById('dumpJson').value = redrawArea.toJson();
-      document.getElementById('dumpJson').style.display='block';
+        document.getElementById('dumpJson').value = redrawArea.toJson();
+        document.getElementById('dumpJson').style.display = 'block';
     }
 
     function showJsonInput(btn) {
-      btn.style.display='none';
-      document.getElementById('loadJson').style.display='block';
-      document.getElementById('loadBtn').style.display='block';
+        btn.style.display = 'none';
+        document.getElementById('loadJson').style.display = 'block';
+        document.getElementById('loadBtn').style.display = 'block';
     }
 
     function loadFromJson() {
-      redrawArea.fromJson(document.getElementById('loadJson').value);
+        redrawArea.fromJson(document.getElementById('loadJson').value);
     }
 
     var asByteDownload = (function() {
