@@ -50,7 +50,8 @@
 	__webpack_require__(52);
 	__webpack_require__(53);
 	__webpack_require__(54);
-	module.exports = __webpack_require__(55);
+	__webpack_require__(55);
+	module.exports = __webpack_require__(56);
 
 
 /***/ },
@@ -81,10 +82,20 @@
 
 	var _controlsControlsDispatcherJs2 = _interopRequireDefault(_controlsControlsDispatcherJs);
 
+	/**
+	 * Namespace-root, that will be set to window-Object.
+	 * @access private
+	 */
 	var redrawNs = {
 	    tools: {}
 	};
 
+	/**
+	 * Makes a blob from eg base64-string.
+	 * @access private
+	 * @param data {string} encodedData - to encode
+	 * @returns {Blob} results
+	 */
 	function dataURItoBlob(encodedData) {
 	    var decodedData = atob(encodedData.split(',')[1]);
 	    var array = []; // 8-bit unsigned array
@@ -96,7 +107,15 @@
 	    });
 	}
 
-	function defineTools(allTools, options) {
+	/**
+	 * If the user has defined the options.tools, then use this to
+	 * extract the sepcified subset from allTools.
+	 * @access private
+	 * @param {Object[]} allTools - should be tools to pick from.
+	 * @param {Object} options - with or without property tools.
+	 * @returns {Object} containing all or the selected tools.
+	 */
+	function getToolsFromUserSettings(allTools, options) {
 
 	    if (options && options.tools) {
 	        var definedTools = {};
@@ -110,14 +129,29 @@
 	    }
 	}
 
+	/**
+	 * Defines the options-properties allowed to infect all tools-settings.
+	 * @access private
+	 */
 	var globalOverrides = ['color', 'activeColor'];
 
+	/**
+	 * Figures out which options should be applied for a particular toolName.
+	 * @access private
+	 * @param {Object} allProps - already defined options, that shold not be lost, but perhaps
+	 * replaced if defined in precedenceProps or globalOptions.
+	 * @param {Object} precedenceProps - that may have a property named toolName, that will
+	 * replace options from allProps.
+	 * @param {Object} globalOptions - top-level options that will overwrite allProp but not precedenceProps 
+	 * @param {string} toolName - name of the tool, which options is processed
+	 * @returns {Object} with tool applies options
+	 */
 	function overwriteProps(allProps, precedenceProps, globalOptions, toolName) {
 	    var results = {};
 
 	    for (var p in allProps[toolName].options) {
 	        if (allProps[toolName].options.hasOwnProperty(p)) {
-	            if (precedenceProps && precedenceProps[toolName] && precedenceProps[toolName].hasOwnProperty(p)) {
+	            if (precedenceProps[toolName] && precedenceProps[toolName] && precedenceProps[toolName].hasOwnProperty(p)) {
 	                results[p] = precedenceProps[toolName][p];
 	            } else if (globalOverrides.indexOf(p) > -1 && globalOptions.hasOwnProperty(p)) {
 	                results[p] = globalOptions[p];
@@ -130,7 +164,7 @@
 	}
 
 	/**
-	 * Main module.
+	 * Main module, and the only public api for usage.
 	 * @module redraw
 	 */
 
@@ -154,9 +188,15 @@
 	        }
 
 	        var controlsDispatcher = new _controlsControlsDispatcherJs2['default'](events);
-	        this.tools = [];
+
 	        this.initializeTools(events, options);
 	    }
+
+	    /**
+	     * Get the png-representation of the canvas.
+	     * @access public
+	     * @returns {string} with base64 encoded png.
+	     */
 
 	    _createClass(Redraw, [{
 	        key: 'getDataUrlForExport',
@@ -167,25 +207,52 @@
 	                multiplier: 1 / this._canvas.scale
 	            });
 	        }
+
+	        /**
+	         * Get the base64-encoded png-representation of the canvas.
+	         * @access public
+	         * @returns {string} with base64 encoded png.
+	         */
 	    }, {
 	        key: 'toBase64URL',
 	        value: function toBase64URL() {
 	            return this.getDataUrlForExport();
 	        }
+
+	        /**
+	         * Get the binary png-representation of the canvas.
+	         * @access public
+	         * @returns {Blob} with canvas as png.
+	         */
 	    }, {
 	        key: 'toDataBlob',
 	        value: function toDataBlob() {
 	            return dataURItoBlob(this.getDataUrlForExport());
 	        }
+
+	        /**
+	         * Get the json-representation of the canvas.
+	         * @access public
+	         * @param {boolean} includeImage - true if background-image should be included in the json.
+	         * @returns {string} with json.
+	         */
 	    }, {
 	        key: 'toJson',
 	        value: function toJson(includeImage) {
-	            var x = this._canvas.canvas.toObject();
+
+	            var jsObj = this._canvas.canvas.toObject(['lockMovementX', 'lockMovementY', 'lockRotation', 'lockScalingX', 'lockScalingY', 'lockUniScaling', 'hasControls', 'hasRotatingPoint', 'selectable', 'fill', 'padding']);
+
 	            if (!includeImage) {
-	                delete x.backgroundImage;
+	                delete jsObj.backgroundImage;
 	            }
-	            return JSON.stringify(x);
+	            return JSON.stringify(jsObj);
 	        }
+
+	        /**
+	         * Resets image and loads content from provided json.
+	         * @access public
+	         * @param {string} jsonRepresentation - to provide as current state of the canvas.
+	         */
 	    }, {
 	        key: 'fromJson',
 	        value: function fromJson(jsonRepresentation) {
@@ -194,25 +261,49 @@
 
 	            c.loadFromJSON(jsonRepresentation, c.renderAll.bind(c));
 	        }
+
+	        /**
+	         * Tells whether or not any objects are present in the canvas, i.e. arrows, boxes other than the image itself.
+	         * @access public
+	         * @returns {boolean} true if there are obejcts, i.e.
+	         */
+	    }, {
+	        key: 'isEmpty',
+	        value: function isEmpty() {
+	            return this._canvas.getAllObjects().length === 0;
+	        }
+
+	        /**
+	         * Returns the canvas representation, as is from Fabric.js
+	         * @access public
+	         * @returns {Object} canvas, see http://fabricjs.com/.
+	         */
+	    }, {
+	        key: 'getCanvas',
+	        value: function getCanvas() {
+	            return this._canvas.canvas;
+	        }
+
+	        /**
+	         * Initializes all selected tools.
+	         * @param {EventAggregator} events - used for all mediated communications.
+	         * @param {Object} options - settings for all tools.
+	         */
 	    }, {
 	        key: 'initializeTools',
 	        value: function initializeTools(events, options) {
 	            var localToolSettings = {};
-	            var toolsInUse = defineTools(redrawNs.tools, options);
-
-	            console.log('init tools', redrawNs.tools, options.toolSettings, options);
-	            for (var toolName in toolsInUse) {
-	                // var passedProps = overwriteProps(redrawNs.tools, options.toolSettings, options, toolName);
-	                // toolsInUse[toolName].options = passedProps;
-	            }
-	            var controls = new _controlsControlsDispatcherJs2['default'](events, options);
+	            options.toolSettings = options.toolSettings || {};
+	            var toolsInUse = getToolsFromUserSettings(redrawNs.tools, options);
 
 	            for (var toolName in toolsInUse) {
-
 	                var passedProps = overwriteProps(redrawNs.tools, options.toolSettings, options, toolName);
+
+	                redrawNs.tools[toolName].options = passedProps;
 
 	                new redrawNs.tools[toolName].toolFn(this._canvas, events, passedProps);
 	            }
+	            var controls = new _controlsControlsDispatcherJs2['default'](events, options);
 	            controls.setupTools(toolsInUse, this._canvas.canvasContainer, options);
 	        }
 	    }]);
@@ -221,6 +312,13 @@
 	})();
 
 	redrawNs.Annotation = Redraw;
+	/**
+	 * Used by tools to register themselves to be available for usage.
+	 * @access public
+	 * @param {string} _name - name of tool.
+	 * @param {function(canvas: CanvasWrapper, events: EventAggregator, passedProps: Object)} _toolFn - callback function, invoked upon initialization of the tools.
+	 * @param {Object} _options - options, to be used as default ones.
+	 */
 	redrawNs.registerTool = function (_name, _toolFn, _options) {
 	    redrawNs.tools[_name] = {
 	        address: _name,
@@ -231,9 +329,7 @@
 	    redrawNs.tools[_name].options.buttonCss = redrawNs.tools[_name].options.buttonCss || '';
 	};
 
-	var b = new _browserApiJs2['default']();
-
-	b.appendToWindow('redraw', redrawNs);
+	new _browserApiJs2['default']().appendToWindow('redraw', redrawNs);
 
 /***/ },
 /* 2 */
@@ -251,13 +347,28 @@
 
 	var isBrowser = typeof window !== 'undefined';
 
+	/**
+	 * Facade of the browser apis. The main purpose id to facilitate testing.
+	 */
+
 	var Browser = (function () {
+	    /**
+	     * Contructor that determines if there is a browser present.
+	     * @constructor
+	     */
+
 	    function Browser() {
 	        _classCallCheck(this, Browser);
 
 	        this.document = isBrowser ? document : {};
 	        this.window = isBrowser ? window : {};
 	    }
+
+	    /**
+	     * Appends property to the browser window object.
+	     * @param {string} attributeName - Name of the property to create/assign.
+	     * @param {Object} obj - value to set.
+	     */
 
 	    _createClass(Browser, [{
 	        key: 'appendToWindow',
@@ -269,6 +380,12 @@
 	            }
 	            return false;
 	        }
+
+	        /**
+	         * Use to retrieve property from the browser window object.
+	         * @param {string} attributeName - Name of the property to create/assign.
+	         * @returns {Object} obj - retrieved value, or mock if not browser.
+	         */
 	    }, {
 	        key: 'getFromWindow',
 	        value: function getFromWindow(attributeName) {
@@ -305,6 +422,11 @@
 
 	var _canvasConstJs2 = _interopRequireDefault(_canvasConstJs);
 
+	/**
+	* Gets the scroll position of a dom element.
+	* @access private
+	* @param {Object} elem - target element.
+	*/
 	function scrollPosition(elem) {
 	    var left = 0,
 	        top = 0;
@@ -317,7 +439,19 @@
 	    return [left, top];
 	}
 
+	/**
+	 * Canvas object that facilitates 
+	 */
+
 	var Canvas = (function () {
+	    /**
+	    * Tools contructor. Is provided with canvas-wrapper and eventAggregator by contract.
+	    * @constructor
+	    * @param {Object} imgElement - dom element that will be replaced and
+	    * used as background for canvas.
+	    * @param {Object} options - parameters used to setup looks and all tools preferences.
+	    */
+
 	    function Canvas(imgElement, options) {
 	        _classCallCheck(this, Canvas);
 
@@ -372,15 +506,36 @@
 	                this.scale = scaleY;
 	            }
 	        }
-	        this.width = this.scale * imgElement.width;
-	        this.height = this.scale * imgElement.height;
 	    }
+
+	    /**
+	     * Gets the top position of the canvas dom element.
+	     * @access public
+	     * @returns {number} position in pixels?
+	     */
 
 	    _createClass(Canvas, [{
 	        key: "getCanvasTop",
 	        value: function getCanvasTop() {
 	            return this.canvasContainer.offsetTop;
 	        }
+
+	        /**
+	         * Gets the array of all objects of the canvas.
+	         * @access public
+	         * @returns {Array} with canvas object, or undefined if empty.
+	         */
+	    }, {
+	        key: "getAllObjects",
+	        value: function getAllObjects() {
+	            return this.canvas.getObjects();
+	        }
+
+	        /**
+	         * Set/unset whether or not it is possible to select objects of the canvas.
+	         * @access pulic
+	         * @param {boolean} isEnabled - true if selection is enabled, false otherwise.
+	         */
 	    }, {
 	        key: "enableSelection",
 	        value: function enableSelection(isEnabled) {
@@ -388,21 +543,6 @@
 	            this.canvas.forEachObject(function (o) {
 	                o.selectable = isEnabled;
 	            });
-	        }
-	    }, {
-	        key: "getWidth",
-	        value: function getWidth() {
-	            return this.width;
-	        }
-	    }, {
-	        key: "getOffsetLeft",
-	        value: function getOffsetLeft() {
-	            return this.canvasLeft - scrollPosition(this.canvasElem)[0];
-	        }
-	    }, {
-	        key: "getOffsetTop",
-	        value: function getOffsetTop() {
-	            return this.getCanvasTop() - scrollPosition(this.canvasElem)[1];
 	        }
 	    }]);
 
@@ -425,6 +565,7 @@
 		TOOL: {
 			ARROW: 'arrow',
 			BOX: 'box',
+			BLUR: 'blur',
 			CLEAR: 'clear',
 			DUMP: 'dump',
 			HLINE: 'hline',
@@ -445,6 +586,9 @@
 /* 5 */
 /***/ function(module, exports) {
 
+	/**
+	* Mediator for events.
+	*/
 	"use strict";
 
 	Object.defineProperty(exports, "__esModule", {
@@ -456,19 +600,27 @@
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 	var EventAggregator = (function () {
+	    /**
+	     * Contructor that initializes internal stuff.
+	     * @constructor
+	     */
+
 	    function EventAggregator() {
 	        _classCallCheck(this, EventAggregator);
 
-	        this.subscriptions = {};
 	        this.subscriptionsByTopic = {};
 	    }
 
+	    /**
+	     * Registers a subscriber for a specific event topic.
+	     * @param {string} topic - name of the event type / topic.
+	     * @param {string} subscriberId - id the subscriber, must be unique.
+	     * @param {function(topic: string, sender: string, payload: Object)} onNotifyFn - callback
+	     * invoked upon when upon notification.
+	     * @param {Object} [_invokationScope] - scope to be used when invoking callback.
+	     */
+
 	    _createClass(EventAggregator, [{
-	        key: "subscribe",
-	        value: function subscribe(subscriber, onNotifyFn) {
-	            this.subscriptions[subscriber] = onNotifyFn;
-	        }
-	    }, {
 	        key: "subscribeTo",
 	        value: function subscribeTo(topic, subscriberId, onNotifyFn, _invokationScope) {
 	            if (!this.subscriptionsByTopic[topic]) {
@@ -479,21 +631,11 @@
 	        }
 
 	        // ToDo needs test
-	    }, {
-	        key: "unsubscribe",
-	        value: function unsubscribe(_subscriber) {
-	            delete this.subscriptions[_subscriber];
-	            for (var i in this.subscriptionsByTopic) {
-
-	                for (var j in this.subscriptionsByTopic[i]) {
-	                    if (this.subscriptionsByTopic[i][j].subscriber === _subscriber) {
-	                        this.subscriptionsByTopic[i].splice(j, 1);
-	                    }
-	                }
-	            }
-	        }
-
-	        // ToDo needs test
+	        /**
+	         * Unregisters a subscriber from a specific event topic.
+	         * @param {string} topic - name of the event type / topic.
+	         * @param {string} _subscriber - id the unique subscriber.
+	         */
 	    }, {
 	        key: "unsubscribeTo",
 	        value: function unsubscribeTo(topic, _subscriber) {
@@ -503,14 +645,16 @@
 	                }
 	            }
 	        }
+
+	        /**
+	         * Called to notify all subscribers of this topic
+	         * @param {string} topic - name of the event type / topic.
+	         * @param {string} sender - address of the sender.
+	         * @param {Object} payload - any data to pass to the subscriber.
+	         */
 	    }, {
 	        key: "notify",
 	        value: function notify(topic, sender, payload) {
-
-	            // for (var s1 in this.subscriptions) {
-	            //     this.subscriptions[s1].apply(undefined, [topic, sender, payload]);
-	            //     console.log('any', s1);
-	            // }
 	            for (var s2 in this.subscriptionsByTopic[topic]) {
 	                var scope = undefined;
 	                if (this.subscriptionsByTopic[topic][s2].invokationScope) {
@@ -545,7 +689,15 @@
 
 	var _canvasConstJs2 = _interopRequireDefault(_canvasConstJs);
 
+	/**
+	 * Css class for all buttons of the toolbar.
+	 */
 	var BUTTON_CLASS = 'redraw_btn';
+
+	/**
+	 * Adds a class to the array of classes.
+	 * @private
+	 */
 	function addClasses(btnObj, classes) {
 	    if (!classes) return;
 	    var allClasses = classes.split(' ');
@@ -555,7 +707,18 @@
 	    });
 	}
 
-	var ControlsDispatcher = function ControlsDispatcher(eventAggregator, options) {
+	/**
+	 * Main manager for the toolbar.
+	 */
+
+	var ControlsDispatcher =
+	/**
+	 * Controls contructor. Is provided with canvas-wrapper and options to initialize to toolbar.
+	 * @constructor
+	 * @param {Canvas} canvasWrapper - Canvas.
+	 * @param {Object} options - from user.
+	 */
+	function ControlsDispatcher(eventAggregator, options) {
 	    _classCallCheck(this, ControlsDispatcher);
 
 	    this.toolsInUse = {};
@@ -575,10 +738,6 @@
 	        };
 	    }
 
-	    eventAggregator.subscribeTo('canvas-selection', 'toolbar', function (subscriptionId, sender, status) {
-	        delBtn.className = status === 'selected' ? '' : 'inactive';
-	    });
-
 	    var manageKeys = function manageKeys(e) {
 	        if (e.keyCode === 46 || e.keyCode === 27) {
 
@@ -594,17 +753,17 @@
 	        addClasses(container, _canvasConstJs2['default'].CSS.TOOLBAR);
 	        addClasses(container, options.toolbarCss);
 
-	        domParent.appendChild(container);
+	        if (mainOptions.toolbarFirst === true) {
+	            domParent.insertBefore(container, domParent.firstChild);
+	        } else {
+	            domParent.appendChild(container);
+	        }
 
 	        for (var toolName in tools) {
 	            var btn = document.createElement('button');
-	            btn.textContent = tools[toolName].options.label;
+	            btn.innerHTML = tools[toolName].options.label;
 
 	            btn.classList.add(_canvasConstJs2['default'].CSS.BUTTON);
-
-	            if (toolName === 'arrow') {
-	                console.log('setting up arrow tool', tools[toolName].options);
-	            }
 
 	            addClasses(btn, mainOptions.buttonCss);
 	            addClasses(btn, tools[toolName].options.buttonCss);
@@ -628,6 +787,14 @@
 	                currTool.classList.add(btnActiveCss);
 	            }
 	        }, this);
+
+	        eventAggregator.subscribeTo('tool-enabled', 'toolbar', function (subscriptionId, sender, isEnabled) {
+	            if (isEnabled) {
+	                this.toolsInUse[sender].classList.remove('disabled');
+	            } else {
+	                this.toolsInUse[sender].classList.add('disabled');
+	            }
+	        }, this);
 	    };
 	};
 
@@ -639,10 +806,6 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
-
-	Object.defineProperty(exports, '__esModule', {
-	    value: true
-	});
 
 	var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
@@ -658,19 +821,35 @@
 
 	var _browserApiJs2 = _interopRequireDefault(_browserApiJs);
 
+	/** fabric.js */
 	var f = __webpack_require__(8).fabric;
-
+	/** length of arrow head */
 	var indicationLength = 20;
+	/** line used during drag n drop */
+	var line;
 
-	var circleMarker, line;
+	/**
+	 * A tool to paint arrows.
+	 */
 
 	var ArrowTool = (function () {
+	    /**
+	     * Tools contructor. Is provided with canvas-wrapper and eventAggregator by contract.
+	     * @constructor
+	     * @param {Canvas} canvasWrapper - Canvas.
+	     * @param {EventAggregator} eventAggregator - Event mediator.
+	     */
+
 	    function ArrowTool(canvasWrapper, eventAggregator, toolOptions) {
 	        _classCallCheck(this, ArrowTool);
 
+	        /** eventAggregator for madiated cummunications */
 	        this.eventAggregator = eventAggregator;
+	        /** main api to use for canvas manipulation */
 	        this.canvasWrapper = canvasWrapper;
+	        /** coords for the elements of the arrow */
 	        this.arrow = this.canvas = this.start = this.end = undefined;
+	        /** options */
 	        this.options = toolOptions;
 
 	        var callee = this;
@@ -678,7 +857,7 @@
 	        this.eventAggregator.subscribeTo(_canvasConstJs2['default'].TOOL.ARROW, 'ArrowTool', function () {
 	            callee.initListeners.apply(callee, arguments);
 	        });
-
+	        /** shorthand to canvas */
 	        this.canvas = canvasWrapper.canvas;
 
 	        this.moveFn = function (options) {
@@ -701,7 +880,14 @@
 	        };
 	    }
 
-	    // Cred till http://stackoverflow.com/questions/29890294/arrow-shape-using-fabricjs
+	    /** Default options for tools initialization */
+
+	    /**
+	     * Move the head of the arrow.
+	     * Cred for http://stackoverflow.com/questions/29890294/arrow-shape-using-fabricjs
+	     * @private
+	     * @param {Object} points - 4d.
+	     */
 
 	    _createClass(ArrowTool, [{
 	        key: 'moveArrowIndicator',
@@ -733,6 +919,11 @@
 
 	            this.canvas.add(this.arrow);
 	        }
+
+	        /**
+	         * Cancels this paint operation, i.e. removes any ongoing paint-objects och de-registers listeners.
+	         * @private
+	         */
 	    }, {
 	        key: 'abort',
 	        value: function abort() {
@@ -747,6 +938,12 @@
 	            this.eventAggregator.unsubscribeTo('keydown', 'ArrowTool');
 	            this.done();
 	        }
+
+	        /**
+	         * Function callback, invoked when mouse moves, even before mouse has been pressed.
+	         * @private
+	         * @param {Object} options - for the event.
+	         */
 	    }, {
 	        key: 'onMove',
 	        value: function onMove(options) {
@@ -766,6 +963,12 @@
 
 	            this.canvas.renderAll();
 	        }
+
+	        /**
+	         * Function callback, invoked on mouse up.
+	         * @private
+	         * @param {Object} options - for the event.
+	         */
 	    }, {
 	        key: 'onMUP',
 	        value: function onMUP(options) {
@@ -784,7 +987,8 @@
 	                var group = new f.Group([line, this.arrow], {
 	                    hasControls: false,
 	                    hasBorders: true,
-	                    selectable: false
+	                    selectable: false,
+	                    fill: this.options.color
 	                });
 	                line.stroke = this.options.color;
 
@@ -796,6 +1000,12 @@
 	            this.arrow = line = this.start = this.end = undefined;
 	            this.canvas.renderAll();
 	        }
+
+	        /**
+	         * Function callback, invoked on mouse down.
+	         * @private
+	         * @param {Object} options - for the event.
+	         */
 	    }, {
 	        key: 'onMouseDown',
 	        value: function onMouseDown(options) {
@@ -817,6 +1027,14 @@
 
 	            this.canvas.add(line);
 	        }
+
+	        /**
+	         * Function callback, invoked when toolbar is clicked.
+	         * @private
+	         * @param {string} topic - .
+	         * @param {string} sender - .
+	         * @param {string} payload - value shold be "toolbar-deactivate" if tool is active.
+	         */
 	    }, {
 	        key: 'initListeners',
 	        value: function initListeners(topic, sender, payload) {
@@ -842,6 +1060,11 @@
 	            this.canvas.on('mouse:move', this.moveFn);
 	            this.canvas.on('mouse:up', this.upFn);
 	        }
+
+	        /**
+	         * Removes listeners.
+	         * @private
+	         */
 	    }, {
 	        key: 'removeCanvasListeners',
 	        value: function removeCanvasListeners() {
@@ -861,8 +1084,6 @@
 	};
 
 	new _browserApiJs2['default']().getFromWindow('redraw').registerTool(_canvasConstJs2['default'].TOOL.ARROW, ArrowTool, toolProps);
-	exports['default'] = ArrowTool;
-	module.exports = exports['default'];
 
 /***/ },
 /* 8 */
@@ -14387,9 +14608,20 @@
 
 	var _browserApiJs2 = _interopRequireDefault(_browserApiJs);
 
+	/** used during drag n drop */
 	var rect;
+	/**
+	 * A tool to paint boxes.
+	 */
 
-	var BoxTool = function BoxTool(canvasWrapper, eventAggregator, toolOptions) {
+	var BoxTool =
+	/**
+	 * Tools contructor. Is provided with canvas-wrapper and eventAggregator by contract.
+	 * @constructor
+	 * @param {Canvas} canvasWrapper - Canvas.
+	 * @param {EventAggregator} eventAggregator - Event mediator.
+	 */
+	function BoxTool(canvasWrapper, eventAggregator, toolOptions) {
 	    _classCallCheck(this, BoxTool);
 
 	    eventAggregator.subscribeTo(_canvasConstJs2['default'].TOOL.BOX, 'BoxTool', attachBoxListener);
@@ -14425,8 +14657,6 @@
 	            currWidth = pointer.x - startLeft;
 	            currHeight = pointer.y - startTop;
 
-	            console.log('move', arguments);
-
 	            rect.set({
 	                'width': currWidth
 	            });
@@ -14454,7 +14684,6 @@
 
 	    function mouseDown(options) {
 	        var pointer = canvas.getPointer(options.e);
-	        console.log('down', pointer);
 	        currWidth = currHeight = 0;
 
 	        startTop = pointer.y;
@@ -14497,69 +14726,23 @@
 
 	        canvas.on('mouse:down', mouseDown);
 	    }
-	};
+	}
+	/**
+	 * Default options.
+	 */
+	;
 
+	exports['default'] = BoxTool;
 	var defaultToolProps = {
 	    label: 'Box',
 	    color: _canvasConstJs2['default'].DEFAULT_COLOR
 	};
 
 	new _browserApiJs2['default']().getFromWindow('redraw').registerTool(_canvasConstJs2['default'].TOOL.BOX, BoxTool, defaultToolProps);
-
-	exports['default'] = BoxTool;
 	module.exports = exports['default'];
 
 /***/ },
 /* 52 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	Object.defineProperty(exports, '__esModule', {
-		value: true
-	});
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
-
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
-
-	var _canvasConstJs = __webpack_require__(4);
-
-	var _canvasConstJs2 = _interopRequireDefault(_canvasConstJs);
-
-	var _browserApiJs = __webpack_require__(2);
-
-	var _browserApiJs2 = _interopRequireDefault(_browserApiJs);
-
-	var ResetTool = function ResetTool(canvasWrapper, eventAggregator) {
-		_classCallCheck(this, ResetTool);
-
-		eventAggregator.subscribeTo(_canvasConstJs2['default'].TOOL.CLEAR, 'ResetTool', initClear);
-		function initClear(topic, sender, payload) {
-			if (payload !== 'toolbar-deactivate' && confirm('This will restore your image to its default state.\nAll your modifications will be deleted.\nDo you want to continue?')) {
-				clearAllElements();
-			}
-		}
-
-		function clearAllElements() {
-			var c = canvasWrapper.canvas;
-			var all = c.getObjects();
-			for (var i = all.length - 1; i >= 0; i--) {
-				c.remove(all[i]);
-			}
-		}
-	};
-
-	var toolProps = {
-		label: 'Clear'
-	};
-
-	new _browserApiJs2['default']().getFromWindow('redraw').registerTool(_canvasConstJs2['default'].TOOL.CLEAR, ResetTool, toolProps);
-	exports['default'] = ResetTool;
-	module.exports = exports['default'];
-
-/***/ },
-/* 53 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -14580,98 +14763,251 @@
 
 	var _browserApiJs2 = _interopRequireDefault(_browserApiJs);
 
-	var HorizontalLineTool = function HorizontalLineTool(canvasWrapper, eventAggregator, toolOptions) {
-	    _classCallCheck(this, HorizontalLineTool);
+	/** used during drag n drop */
+	var rect;
+	/**
+	 * A tool to blur areas.
+	 */
 
-	    var movingRect;
+	var BlurTool =
+	/**
+	 * Tools contructor. Is provided with canvas-wrapper and eventAggregator by contract.
+	 * @constructor
+	 * @param {Canvas} canvasWrapper - Canvas.
+	 * @param {EventAggregator} eventAggregator - Event mediator.
+	 */
+	function BlurTool(canvasWrapper, eventAggregator, toolOptions) {
+	    _classCallCheck(this, BlurTool);
+
+	    eventAggregator.subscribeTo(_canvasConstJs2['default'].TOOL.BLUR, 'BlurTool', attachBoxListener);
+	    var callbackCtx = this;
 	    var canvas = canvasWrapper.canvas;
-	    eventAggregator.subscribeTo(_canvasConstJs2['default'].TOOL.HLINE, 'HorizontalLineTool', _HorizontalLineTool);
 
 	    function notify(message) {
-	        eventAggregator.notify('TOOL_USAGE', _canvasConstJs2['default'].TOOL.HLINE, message);
+	        eventAggregator.notify('TOOL_USAGE', _canvasConstJs2['default'].TOOL.BLUR, message);
 	    }
 
-	    function createLineRect() {
-	        return new fabric.Rect({
+	    function done() {
+	        notify('inactive');
+	        detachBoxListener();
+	        canvasWrapper.enableSelection(true);
+	    }
+
+	    function detachBoxListener() {
+	        if (rect) {
+	            canvas.off('mouse:down', mouseDown);
+	            canvas.off('mouse:move', drawBox);
+	            canvas.off('mouse:up', drawBoxDone);
+
+	            rect = undefined;
+	            eventAggregator.unsubscribeTo('keydown', 'BlurTool');
+	        }
+	    }
+	    var currWidth, currHeight;
+
+	    function drawBox(options) {
+	        if (rect) {
+	            var pointer = canvas.getPointer(options.e);
+
+	            currWidth = pointer.x - startLeft;
+	            currHeight = pointer.y - startTop;
+
+	            rect.set({
+	                'width': currWidth
+	            });
+	            rect.set({
+	                'height': currHeight
+	            });
+	            rect.setCoords();
+	            canvas.renderAll();
+	        }
+	    }
+
+	    function applyFilter(index, filter, obj) {
+	        obj.filters[index] = filter;
+	        obj.applyFilters(canvas.renderAll.bind(canvas));
+	    }
+
+	    function drawBoxDone(options) {
+	        canvas.off('mouse:move', drawBox);
+	        canvas.off('mouse:up', drawBoxDone);
+	        canvas.remove(rect);
+
+	        var pointer = canvas.getPointer(options.e);
+	        currWidth = pointer.x - startLeft;
+	        currHeight = pointer.y - startTop;
+	        var pixels = canvas.getContext().getImageData(pointer.x, pointer.y, currWidth, currHeight);
+
+	        console.log('done', pixels);
+
+	        var object = fabric.util.object.clone(canvasWrapper.image);
+
+	        object.set({
+	            originX: 'left',
+	            originY: 'top',
 	            left: 0,
-	            top: 1,
-	            width: canvasWrapper.getWidth(),
-	            height: 2,
-	            fill: toolOptions.activeColor,
-	            opacity: 0.7,
-	            hasControls: false,
-	            hasBorders: true
+	            top: 0,
+	            selectable: false
 	        });
+
+	        object.hasRotatingPoint = true;
+
+	        var left = -1 * (rect.left + rect.width / 2 - pointer.x) + 10;
+	        var top = -1 * (rect.top + rect.top / 2 - pointer.y) + 10;
+
+	        console.log('clip', object);
+
+	        var x = rect;
+
+	        var clipRect = new fabric.Rect({
+	            left: -100,
+	            top: -100,
+	            fill: 'red',
+	            width: 120,
+	            height: 120
+	        });
+
+	        rect.left = rect.left - object.width / 2;
+	        rect.top = rect.top - object.height / 2;
+	        var x = rect;
+
+	        object.clipTo = function (ctx) {
+	            ctx.rect(-100, -100, 100, 100);
+	            x.render(ctx);
+	        };
+
+	        var f = fabric.Image.filters;
+	        applyFilter(9, new f.Convolute({
+	            matrix: [1 / 9, 1 / 9, 1 / 9, 1 / 9, 1 / 9, 1 / 9, 1 / 9, 1 / 9, 1 / 9]
+	        }), object);
+
+	        canvas.add(object);
+
+	        canvas.renderAll();
+
+	        rect = undefined;
 	    }
 
-	    function _HorizontalLineTool(addr, sender, action) {
-	        if (action !== 'toolbar-click') {
-	            abort();
+	    var currWidth, currHeight, startTop, startLeft;
+
+	    function mouseDown(options) {
+	        var pointer = canvas.getPointer(options.e);
+	        currWidth = currHeight = 0;
+
+	        startTop = pointer.y;
+	        startLeft = pointer.x;
+
+	        rect = new fabric.Rect({
+	            left: startLeft,
+	            top: startTop,
+	            width: 4,
+	            borderColor: toolOptions.color,
+	            height: 4,
+	            fill: toolOptions.color,
+	            opacity: 0.3,
+	            hasControls: true,
+	            hasRotatingPoint: false,
+	            originX: 'left',
+	            originY: 'top',
+	            selectable: false
+	        });
+
+	        canvas.add(rect);
+	        rect.setCoords();
+	        canvas.renderAll();
+	        canvas.on('mouse:move', drawBox);
+	        canvas.on('mouse:up', drawBoxDone);
+	    }
+
+	    function attachBoxListener(topic, sender, payload) {
+	        if (payload === 'toolbar-deactivate') {
+	            done();
 	            return;
 	        }
-	        notify('active');
-	        movingRect = createLineRect();
-	        eventAggregator.subscribeTo('keydown', 'HLineTool', function (topic, sender, keyCode) {
+	        eventAggregator.subscribeTo('keydown', 'BlurTool', function (topic, sender, keyCode) {
 	            if (keyCode === 27) {
-	                abort();
+	                done();
 	            }
-	        });
+	        }, callbackCtx);
+	        canvasWrapper.enableSelection(false);
+	        notify('active');
 
-	        function abort() {
-	            canvas.remove(movingRect);
-	            movingRect = undefined;
-	            eventAggregator.unsubscribe('HLineTool');
+	        canvas.on('mouse:down', mouseDown);
+	    }
+	}
+	/**
+	 * Default options.
+	 */
+	;
 
-	            detachHLineListener();
-	            notify('inactive');
-	        }
-
-	        var onRectMove = function onRectMove(ctx) {
-	            if (movingRect) {
-	                movingRect.set({
-	                    'left': 0
-	                });
-	            }
-	        };
-	        movingRect.on('moving', onRectMove);
-
-	        canvas.add(movingRect);
-
-	        var onMove = function onMove(options) {
-	            if (movingRect) {
-	                movingRect.set({
-	                    'top': canvas.getPointer(options.e).y
-	                });
-	                movingRect.setCoords();
-	                canvas.renderAll();
-	            }
-	        };
-	        canvas.on('mouse:move', onMove);
-
-	        function detachHLineListener() {
-
-	            canvas.off('mouse:move', onMove);
-	            canvas.off('mouse:up', onMUP);
-	        }
-
-	        var onMUP = function onMUP(options) {
-	            movingRect.fill = toolOptions.color;
-	            movingRect = createLineRect();
-	            canvas.add(movingRect);
-	        };
-
-	        canvas.on('mouse:up', onMUP);
-	    };
+	exports['default'] = BlurTool;
+	var defaultToolProps = {
+	    label: 'Blur',
+	    color: _canvasConstJs2['default'].DEFAULT_COLOR
 	};
+
+	new _browserApiJs2['default']().getFromWindow('redraw').registerTool(_canvasConstJs2['default'].TOOL.BLUR, BlurTool, defaultToolProps);
+	module.exports = exports['default'];
+
+/***/ },
+/* 53 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, '__esModule', {
+		value: true
+	});
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+
+	var _canvasConstJs = __webpack_require__(4);
+
+	var _canvasConstJs2 = _interopRequireDefault(_canvasConstJs);
+
+	var _browserApiJs = __webpack_require__(2);
+
+	var _browserApiJs2 = _interopRequireDefault(_browserApiJs);
+
+	/**
+	 * A tool to reset the canvas, i.e. remove all objects.
+	 */
+
+	var ResetTool =
+	/**
+	 * Tools contructor. Is provided with canvas-wrapper and eventAggregator by contract.
+	 * @constructor
+	 * @param {Canvas} canvasWrapper - Canvas.
+	 * @param {EventAggregator} eventAggregator - Event mediator.
+	 */
+	function ResetTool(canvasWrapper, eventAggregator) {
+		_classCallCheck(this, ResetTool);
+
+		eventAggregator.subscribeTo(_canvasConstJs2['default'].TOOL.CLEAR, 'ResetTool', initClear);
+		function initClear(topic, sender, payload) {
+			if (payload !== 'toolbar-deactivate' && confirm('This will restore your image to its default state.\nAll your modifications will be deleted.\nDo you want to continue?')) {
+				clearAllElements();
+			}
+		}
+
+		function clearAllElements() {
+			var c = canvasWrapper.canvas;
+			var all = c.getObjects();
+			for (var i = all.length - 1; i >= 0; i--) {
+				c.remove(all[i]);
+			}
+		}
+	};
+
+	exports['default'] = ResetTool;
 
 	var toolProps = {
-	    label: 'Limit line',
-	    color: _canvasConstJs2['default'].DEFAULT_COLOR,
-	    activeColor: '#55f'
+		label: 'Clear'
 	};
 
-	new _browserApiJs2['default']().getFromWindow('redraw').registerTool(_canvasConstJs2['default'].TOOL.HLINE, HorizontalLineTool, toolProps);
-	exports['default'] = HorizontalLineTool;
+	new _browserApiJs2['default']().getFromWindow('redraw').registerTool(_canvasConstJs2['default'].TOOL.CLEAR, ResetTool, toolProps);
 	module.exports = exports['default'];
 
 /***/ },
@@ -14696,9 +15032,147 @@
 
 	var _browserApiJs2 = _interopRequireDefault(_browserApiJs);
 
-	var RemoveTool = function RemoveTool(canvasWrapper, eventAggregator) {
+	/**
+	 * A tool to create horizontal lines.
+	 */
+
+	var HorizontalLineTool =
+	/**
+	 * Tools contructor. Is provided with canvas-wrapper and eventAggregator by contract.
+	 * @constructor
+	 * @param {Canvas} canvasWrapper - Canvas.
+	 * @param {EventAggregator} eventAggregator - Event mediator.
+	 */
+	function HorizontalLineTool(canvasWrapper, eventAggregator, toolOptions) {
+	    _classCallCheck(this, HorizontalLineTool);
+
+	    var canvas = canvasWrapper.canvas;
+	    var horizontalLine;
+	    eventAggregator.subscribeTo(_canvasConstJs2['default'].TOOL.HLINE, 'HorizontalLineTool', _HorizontalLineTool);
+
+	    function notify(message) {
+	        eventAggregator.notify('TOOL_USAGE', _canvasConstJs2['default'].TOOL.HLINE, message);
+	    }
+
+	    function createHorizontalLine() {
+
+	        return new fabric.Line([0, 0, canvas.width, 0], {
+	            left: 0,
+	            top: 1,
+	            hasControls: false,
+	            lockMovementX: true,
+	            opacity: 0.7,
+	            padding: 4,
+	            stroke: toolOptions.color,
+	            strokeWidth: 2
+	        });
+	    }
+
+	    function _HorizontalLineTool(addr, sender, action) {
+	        if (action !== 'toolbar-click') {
+	            abort();
+	            return;
+	        }
+
+	        notify('active');
+
+	        horizontalLine = createHorizontalLine();
+	        canvas.add(horizontalLine);
+
+	        eventAggregator.subscribeTo('keydown', 'HorizontalLine', function (topic, sender, keyCode) {
+	            if (keyCode === 27) {
+	                abort();
+	            }
+	        });
+
+	        function abort() {
+	            canvas.remove(horizontalLine);
+	            horizontalLine = undefined;
+	            // TODO unsubscribe
+
+	            detachHorizontalLineListener();
+	            notify('inactive');
+	        }
+
+	        var onMouseMove = function onMouseMove(options) {
+	            if (horizontalLine) {
+	                horizontalLine.set({
+	                    'top': canvas.getPointer(options.e).y
+	                });
+
+	                horizontalLine.setCoords();
+	                canvas.renderAll();
+	            }
+	        };
+	        canvas.on('mouse:move', onMouseMove);
+
+	        var onMouseUp = function onMouseUp(options) {
+	            horizontalLine = createHorizontalLine();
+	            canvas.add(horizontalLine);
+	        };
+	        canvas.on('mouse:up', onMouseUp);
+
+	        function detachHorizontalLineListener() {
+	            canvas.off('mouse:move', onMouseMove);
+	            canvas.off('mouse:up', onMouseUp);
+	        }
+	    };
+	};
+
+	exports['default'] = HorizontalLineTool;
+
+	var toolProps = {
+	    label: 'Limit line',
+	    color: _canvasConstJs2['default'].DEFAULT_COLOR,
+	    activeColor: '#55f'
+	};
+
+	new _browserApiJs2['default']().getFromWindow('redraw').registerTool(_canvasConstJs2['default'].TOOL.HLINE, HorizontalLineTool, toolProps);
+	module.exports = exports['default'];
+
+/***/ },
+/* 55 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/**
+	 * A tool to remove selected elements from canvas!
+	 */
+	'use strict';
+
+	Object.defineProperty(exports, '__esModule', {
+	    value: true
+	});
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+
+	var _canvasConstJs = __webpack_require__(4);
+
+	var _canvasConstJs2 = _interopRequireDefault(_canvasConstJs);
+
+	var _browserApiJs = __webpack_require__(2);
+
+	var _browserApiJs2 = _interopRequireDefault(_browserApiJs);
+
+	/**
+	 * A tool to remove selected elements from canvas.
+	 */
+
+	var RemoveTool =
+	/**
+	 * Tools contructor. Is provided with canvas-wrapper and eventAggregator by contract.
+	 * @constructor
+	 * @param {Canvas} canvasWrapper - Canvas.
+	 * @param {EventAggregator} eventAggregator - Event mediator.
+	 */
+	function RemoveTool(canvasWrapper, eventAggregator) {
 	    _classCallCheck(this, RemoveTool);
 
+	    eventAggregator.notify('tool-enabled', _canvasConstJs2['default'].TOOL.REMOVE, false);
+	    /**
+	    * Called upon removal.
+	    */
 	    var remove = function remove() {
 	        var c = canvasWrapper.canvas;
 	        if (c.getActiveObject()) {
@@ -14707,22 +15181,33 @@
 	    };
 
 	    eventAggregator.subscribeTo(_canvasConstJs2['default'].TOOL.REMOVE, 'RemoveTool', remove);
-	    eventAggregator.subscribe('RemoveTool', function (eventType, keyCode) {
-	        if (eventType === 'keydown' && keyCode === 46) {
-	            remove();
-	        }
+
+	    // eventAggregator.subscribe('RemoveTool', function(eventType, keyCode) {
+	    //     if (eventType === 'keydown' && keyCode === 46) {
+	    //         remove();
+	    //     }
+	    // });
+	    canvasWrapper.canvas.on('object:selected', function (o) {
+	        eventAggregator.notify('tool-enabled', _canvasConstJs2['default'].TOOL.REMOVE, true);
+	    });
+	    canvasWrapper.canvas.on('selection:cleared', function (o) {
+	        eventAggregator.notify('tool-enabled', _canvasConstJs2['default'].TOOL.REMOVE, false);
 	    });
 	};
+
+	exports['default'] = RemoveTool;
 
 	var toolProps = {
 	    label: 'Delete'
 	};
+	/**
+	 * Register tool at the global redraw.registerTool.
+	 */
 	new _browserApiJs2['default']().getFromWindow('redraw').registerTool(_canvasConstJs2['default'].TOOL.REMOVE, RemoveTool, toolProps);
-	exports['default'] = RemoveTool;
 	module.exports = exports['default'];
 
 /***/ },
-/* 55 */
+/* 56 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -14745,7 +15230,18 @@
 
 	var editorHeight = 30;
 
-	var TextTool = function TextTool(canvasWrapper, eventAggregator, toolOptions) {
+	/**
+	 * A tool to create a text editor in the canvas.
+	 */
+
+	var TextTool =
+	/**
+	 * Tools contructor. Is provided with canvas-wrapper and eventAggregator by contract.
+	 * @constructor
+	 * @param {Canvas} canvasWrapper - Canvas.
+	 * @param {EventAggregator} eventAggregator - Event mediator.
+	 */
+	function TextTool(canvasWrapper, eventAggregator, toolOptions) {
 	    _classCallCheck(this, TextTool);
 
 	    var canvas = canvasWrapper.canvas;
@@ -14813,13 +15309,13 @@
 	    }
 	};
 
+	exports['default'] = TextTool;
+
 	var toolProps = {
 	    label: 'Text',
 	    color: _canvasConstJs2['default'].DEFAULT_COLOR
 	};
 	new _browserApiJs2['default']().getFromWindow('redraw').registerTool(_canvasConstJs2['default'].TOOL.TEXT, TextTool, toolProps);
-
-	exports['default'] = TextTool;
 	module.exports = exports['default'];
 
 /***/ }
